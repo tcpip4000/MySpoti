@@ -30,7 +30,7 @@ public class MainActivityFragment extends Fragment {
 
         String[] myData = {"data1", "data2", "data3"};
         List<String> myList = new ArrayList<String>(Arrays.asList(myData));
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_data, R.id.list_item_id, myData);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_data, R.id.list_item_description, myData);
         /*ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_data, R.id.list_item_textview);
         arrayAdapter.add("mango");
         arrayAdapter.add("manzana");
