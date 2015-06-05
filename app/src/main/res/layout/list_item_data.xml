@@ -6,23 +6,15 @@
         style="@style/MyItemList">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-
+            style="@style/MyItem"
             android:layout_weight="1"
             android:gravity="center"
-            android:id="@+id/list_item_image"
-            android:text="image" />
+            android:id="@+id/list_item_image" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-
+            style="@style/MyItem"
             android:layout_weight="2"
-            android:id="@+id/list_item_description"
-            android:text="hola2" />
+            android:id="@+id/list_item_description" />
 
     </LinearLayout>
 

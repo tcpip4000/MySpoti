@@ -2,18 +2,19 @@ package net.ertechnology.myspoti;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
+import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -21,6 +22,8 @@ import java.util.Map;
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment {
+
+    private SimpleAdapter mSimpleAdapter;
 
     public MainActivityFragment() {
     }
@@ -30,9 +33,11 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_main, container, false);
-        ListView listView = (ListView) view.findViewById(R.id.main_listview);
 
+        // Set adapter
+        ListView listView = (ListView) view.findViewById(R.id.main_listview);
         ArrayList<Map<String, String>> data = new ArrayList<Map<String, String>>();
+        ///
         HashMap<String, String> map = new HashMap<>();
         HashMap<String, String> map2 = new HashMap<>();
         map.put("image", "image1");
@@ -41,21 +46,28 @@ public class MainActivityFragment extends Fragment {
         map2.put("description", "Ramones");
         data.add(map);
         data.add(map2);
+        ///
         String[] from = new String[] {"image", "description"};
         int[] to = new int[]{R.id.list_item_image, R.id.list_item_description};
-        SimpleAdapter arrayAdapter = new SimpleAdapter(getActivity(), data, R.layout.list_item_data, from, to);
+        mSimpleAdapter = new SimpleAdapter(getActivity(), data, R.layout.list_item_data, from, to);
+        listView.setAdapter(mSimpleAdapter);
 
-        //String[] myData = {"data1", "data2", "data3"};
-        //List<String> myList = new ArrayList<String>(Arrays.asList(myData));
-        //ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_data, R.id.list_item_description, myData);
+        // Search function
+        EditText search = (EditText) view.findViewById(R.id.main_search);
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
-        /*ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_data, R.id.list_item_textview);
-        arrayAdapter.add("mango");
-        arrayAdapter.add("manzana");
-        arrayAdapter.add("pera");*/
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
 
-        listView.setAdapter(arrayAdapter);
-
+            @Override
+            public void afterTextChanged(Editable s) {
+                Filter filter = mSimpleAdapter.getFilter();
+                filter.filter(s.toString());
+                //Log.d("s is: ", s.toString());
+            }
+        });
 
         return view;
     }
