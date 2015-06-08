@@ -15,6 +15,9 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Album;
+import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.ArtistsPager;
+import kaaes.spotify.webapi.android.models.Pager;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -65,28 +68,14 @@ public class MainActivity extends AppCompatActivity {
     public static void getData(Activity activity) {
         /// Auth
 
-/*        AuthenticationRequest.Builder builder =
+        AuthenticationRequest.Builder builder =
                 new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
         builder.setScopes(new String[]{"streaming"});
         AuthenticationRequest request = builder.build();
-        AuthenticationClient.openLoginActivity(activity, REQUEST_CODE, request);*/
+        AuthenticationClient.openLoginActivity(activity, REQUEST_CODE, request);
         ///
 
-/*        SpotifyApi api = new SpotifyApi();
-        //api.setAccessToken("22837230eb5045ba9826a6542c1c8169:c79858f956ad470aa3f59fa1fc0d214a");
 
-        SpotifyService spotify = api.getService();
-        spotify.getAlbum("2dIGnmEIy1WZIcZCFSj6i8", new Callback<Album>() {
-            @Override
-            public void success(Album album, Response response) {
-                Log.d(LOG_TAG, album.name);
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Log.d(LOG_TAG, error.toString());
-            }
-        });*/
 
     }
 
@@ -104,6 +93,37 @@ public class MainActivity extends AppCompatActivity {
                 case TOKEN:
                     Log.d(LOG_TAG, "token");
                     // Handle successful response
+                    SpotifyApi api = new SpotifyApi();
+                    api.setAccessToken(response.getAccessToken());
+
+                    SpotifyService spotify = api.getService();
+/*                    spotify.getAlbum("2dIGnmEIy1WZIcZCFSj6i8", new Callback<Album>() {
+                        @Override
+                        public void success(Album album, Response response) {
+                            Log.d(LOG_TAG, album.name);
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+                            Log.d(LOG_TAG, error.toString());
+                        }
+                    });*/
+                    spotify.searchArtists("loco", new Callback<ArtistsPager>() {
+                        @Override
+                        public void success(ArtistsPager artistsPager, Response response) {
+                            Log.d(LOG_TAG, artistsPager.toString());
+                            Pager<Artist> artists = artistsPager.artists;
+                            for (Artist artist : artists.items) {
+                                Log.d( LOG_TAG, "name: " + artist.name);
+                                Log.d( LOG_TAG, "followers: " + artist.popularity);
+                            }
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+
+                        }
+                    });
                     break;
 
                 // Auth flow returned an error
