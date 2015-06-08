@@ -1,37 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/MyItemList">
 
-        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <TextView
+            style="@style/MyItem"
             android:layout_weight="1"
             android:gravity="center"
-            android:id="@+id/list_item_id"
-            android:text="hola1" />
+            android:id="@+id/list_item_image" />
 
-        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:id="@+id/list_item_description"
+        <TextView
+            style="@style/MyItem"
             android:layout_weight="2"
-            android:text="hola2" />
+            android:id="@+id/list_item_description" />
 
-        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:id="@+id/list_item_day"
-            android:layout_weight="1"
-            android:text="hola3" />
-
-    </LinearLayout>
-
-</FrameLayout>
+</LinearLayout>
 
