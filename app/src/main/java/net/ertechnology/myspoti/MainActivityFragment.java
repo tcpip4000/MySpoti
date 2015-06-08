@@ -8,10 +8,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 
 /**
  * A placeholder fragment containing a simple view.
@@ -29,8 +25,7 @@ public class MainActivityFragment extends Fragment {
         ListView listView = (ListView) view.findViewById(R.id.main_listview);
 
         String[] myData = {"data1", "data2", "data3"};
-        List<String> myList = new ArrayList<String>(Arrays.asList(myData));
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_data, R.id.list_item_id, myData);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.list_item_data, R.id.list_item_id, myData);
         /*ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_data, R.id.list_item_textview);
         arrayAdapter.add("mango");
         arrayAdapter.add("manzana");
