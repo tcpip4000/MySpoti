@@ -22,7 +22,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 /**
  * Created by Juan on 29/06/2015.
  */
-public class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
+class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
 
     private CustomFilter mFilter;
     private List<Artist> mObjects;
@@ -36,18 +36,26 @@ public class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.list_item_data, parent, false);
-        Artist item = getItem(position);
+        ViewHolder viewHolder;
+        if (convertView == null) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_data, parent, false);
 
-        ImageView image = (ImageView) view.findViewById(R.id.list_item_image);
-        TextView description = (TextView) view.findViewById(R.id.list_item_description);
+            viewHolder = new ViewHolder();
+            viewHolder.image = (ImageView) convertView.findViewById(R.id.list_item_image);
+            viewHolder.description = (TextView) convertView.findViewById(R.id.list_item_description);
 
-        if (item.images.size() > 0) {
-            Picasso.with(getContext()).load(item.images.get(0).url).resize(250, 250).centerCrop().into(image);
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
-        description.setText(item.name);
 
-        return view;
+        Artist item = getItem(position);
+        if (item.images.size() > 0) {
+            Picasso.with(getContext()).load(item.images.get(0).url).resize(250, 250).centerCrop().into(viewHolder.image);
+        }
+        viewHolder.description.setText(item.name);
+
+        return convertView;
     }
 
     @Override
@@ -97,7 +105,7 @@ public class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
             FilterResults results = new FilterResults();
             List<Artist> filteredList = new ArrayList<>();
             String constraintLower = constraint.toString().toLowerCase();
-            if (constraint!= null && constraint.toString().length() > 0) {
+            if (constraint.toString().length() > 0) {
                 for (Artist artist : mOriginalValues) {
                     if (artist.name.toLowerCase().contains(constraintLower)) {
                         filteredList.add(artist);
@@ -137,5 +145,10 @@ public class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
                 Toast.makeText(getContext(), R.string.data_not_found, Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private static class ViewHolder {
+        public ImageView image;
+        public TextView description;
     }
 }

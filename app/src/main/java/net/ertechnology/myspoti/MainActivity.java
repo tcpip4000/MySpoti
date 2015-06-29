@@ -15,11 +15,11 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_CODE = 1337;
     private static final String REDIRECT_URI = "yourcustomprotocol://callback";
     private static final String CLIENT_ID = "22837230eb5045ba9826a6542c1c8169";
-    public String mToken; // TODO: use app session
+    private String mToken; // TODO: use app session
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         return mToken;
     }
 
-    public static void getTokenFromWeb(Activity activity) {
+    private static void getTokenFromWeb(Activity activity) {
         AuthenticationRequest.Builder builder =
                 new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
         builder.setScopes(new String[]{"streaming"});
