@@ -5,7 +5,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +12,11 @@ import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 
 
@@ -41,9 +43,11 @@ public class MainActivityFragment extends Fragment implements AsyncResponse {
         api.setAccessToken(((MainActivity) getActivity()).getToken());
         mSpotify = api.getService();
 
-        GetDataTask getdataTask = new GetDataTask();
+
+        //mCustomAdapter.notifyDataSetChanged();
+/*        GetDataTask getdataTask = new GetDataTask();
         getdataTask.delegate = this;
-        getdataTask.execute("loca");
+        getdataTask.execute("loca");*/
 
         return view;
     }
@@ -51,6 +55,10 @@ public class MainActivityFragment extends Fragment implements AsyncResponse {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        ListView listView = (ListView) getView().findViewById(R.id.main_listview);
+        mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
+        listView.setAdapter(mCustomAdapter);
 
         EditText search = (EditText) getView().findViewById(R.id.main_search);
         search.addTextChangedListener(new TextWatcher() {
