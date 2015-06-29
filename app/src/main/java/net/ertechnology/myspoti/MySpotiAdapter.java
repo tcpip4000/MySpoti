@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.ArtistsPager;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by Juan on 29/06/2015.
@@ -103,12 +107,14 @@ public class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
                         filteredList.add(artist);
                     }
                 }
-                results.count = filteredList.size();
-
-            } else {
-                results.count = 0;
+                if (filteredList.size() == 0) {
+                    MainActivity activity = (MainActivity) getContext();
+                    MainActivityFragment fragment = (MainActivityFragment) activity.getFragmentManager().findFragmentById(R.id.main_container);
+                    ArtistsPager pager = fragment.mSpotify.searchArtists(constraint.toString());
+                    filteredList = pager.artists.items;
+                }
             }
-
+            results.count = filteredList.size();
             results.values = filteredList;
             return results;
         }

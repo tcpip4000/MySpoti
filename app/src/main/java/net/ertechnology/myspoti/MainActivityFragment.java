@@ -25,7 +25,7 @@ public class MainActivityFragment extends Fragment implements AsyncResponse {
 
     private static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     private MySpotiAdapter mCustomAdapter;
-    private SpotifyService mSpotify;
+    protected SpotifyService mSpotify;
 
     public MainActivityFragment() {
     }
@@ -64,14 +64,9 @@ public class MainActivityFragment extends Fragment implements AsyncResponse {
 
             @Override
             public void afterTextChanged(Editable s) {
-
-/*                GetDataTask getdataTask = new GetDataTask();
-                getdataTask.delegate = (AsyncResponse) getActivity().getFragmentManager().findFragmentById(R.id.main_container);
-                getdataTask.execute(s.toString());*/
-
                 Filter filter = mCustomAdapter.getFilter();
                 filter.filter(s.toString());
-                Log.d("s is: ", s.toString());
+                //Log.d("s is: ", s.toString());
             }
         });
     }
@@ -89,6 +84,7 @@ public class MainActivityFragment extends Fragment implements AsyncResponse {
         ListView listView = (ListView) getView().findViewById(R.id.main_listview);
         mCustomAdapter = new MySpotiAdapter(getActivity(), artistsPager.artists.items);
         listView.setAdapter(mCustomAdapter);
+        mCustomAdapter.notifyDataSetChanged();
     }
 
 
