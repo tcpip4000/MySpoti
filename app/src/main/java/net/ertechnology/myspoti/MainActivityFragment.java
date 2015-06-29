@@ -57,6 +57,9 @@ public class MainActivityFragment extends Fragment implements AsyncResponse {
         for (Artist artist : artists.items) {
             Log.d(LOG_TAG, "name: " + artist.name);
             Log.d(LOG_TAG, "followers: " + artist.popularity);
+            if (artist.images.size() > 0) {
+                Log.d(LOG_TAG, "image0: " + artist.images.get(0).url);
+            }
         }
         ListView listView = (ListView) getView().findViewById(R.id.main_listview);
         mCustomAdapter = new MySpotiAdapter(getActivity(), artistsPager.artists.items);

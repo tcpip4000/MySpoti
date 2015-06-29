@@ -33,7 +33,7 @@ public class MySpotiAdapter extends ArrayAdapter<Artist> {
         TextView description = (TextView) view.findViewById(R.id.list_item_description);
 
         if (item.images.size() > 0) {
-            Picasso.with(getContext()).load(item.images.get(0).url).into(image);
+            Picasso.with(getContext()).load(item.images.get(0).url).resize(250, 250).centerCrop().into(image);
         }
         description.setText(item.name);
 
