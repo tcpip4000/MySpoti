@@ -14,13 +14,9 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 /**
  * Created by Juan on 29/06/2015.
@@ -112,6 +108,7 @@ public class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
                     MainActivityFragment fragment = (MainActivityFragment) activity.getFragmentManager().findFragmentById(R.id.main_container);
                     ArtistsPager pager = fragment.mSpotify.searchArtists(constraint.toString());
                     filteredList = pager.artists.items;
+                    mOriginalValues = filteredList;
                 }
             }
             results.count = filteredList.size();
