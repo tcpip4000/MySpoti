@@ -23,7 +23,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment implements AsyncResponse {
+public class MainActivityFragment extends Fragment {
 
     private static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     private MySpotiAdapter mCustomAdapter;
@@ -43,12 +43,6 @@ public class MainActivityFragment extends Fragment implements AsyncResponse {
         api.setAccessToken(((MainActivity) getActivity()).getToken());
         mSpotify = api.getService();
 
-
-        //mCustomAdapter.notifyDataSetChanged();
-/*        GetDataTask getdataTask = new GetDataTask();
-        getdataTask.delegate = this;
-        getdataTask.execute("loca");*/
-
         return view;
     }
 
@@ -56,10 +50,12 @@ public class MainActivityFragment extends Fragment implements AsyncResponse {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        // Set adapter
         ListView listView = (ListView) getView().findViewById(R.id.main_listview);
         mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
         listView.setAdapter(mCustomAdapter);
 
+        // Search button
         EditText search = (EditText) getView().findViewById(R.id.main_search);
         search.addTextChangedListener(new TextWatcher() {
             @Override
@@ -78,40 +74,5 @@ public class MainActivityFragment extends Fragment implements AsyncResponse {
             }
         });
     }
-
-    @Override
-    public void processFinish(ArtistsPager artistsPager) {
-/*        Pager<Artist> artists = artistsPager.artists;
-        for (Artist artist : artists.items) {
-            Log.d(LOG_TAG, "name: " + artist.name);
-            Log.d(LOG_TAG, "followers: " + artist.popularity);
-            if (artist.images.size() > 0) {
-                Log.d(LOG_TAG, "image0: " + artist.images.get(0).url);
-            }
-        }*/
-        ListView listView = (ListView) getView().findViewById(R.id.main_listview);
-        mCustomAdapter = new MySpotiAdapter(getActivity(), artistsPager.artists.items);
-        listView.setAdapter(mCustomAdapter);
-        mCustomAdapter.notifyDataSetChanged();
-    }
-
-
-    private class GetDataTask extends AsyncTask<String, Void, ArtistsPager> {
-
-        public AsyncResponse delegate;
-
-        @Override
-        protected ArtistsPager doInBackground(String... params) {
-            String searchString = params[0];
-            ArtistsPager pager = mSpotify.searchArtists(searchString);
-            return pager;
-        }
-
-        @Override
-        protected void onPostExecute(ArtistsPager artistsPager) {
-            delegate.processFinish(artistsPager);
-        }
-    }
-
 
 }

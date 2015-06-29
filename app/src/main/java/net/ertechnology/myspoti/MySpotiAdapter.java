@@ -64,7 +64,6 @@ public class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
      */
     @Override
     public Filter getFilter() {
-
         if (mFilter == null) {
             mFilter = new CustomFilter();
         }
