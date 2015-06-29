@@ -9,6 +9,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -133,6 +134,7 @@ public class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
                 notifyDataSetChanged();
             } else {
                 notifyDataSetInvalidated();
+                Toast.makeText(getContext(), R.string.data_not_found, Toast.LENGTH_SHORT).show();
             }
         }
     }
