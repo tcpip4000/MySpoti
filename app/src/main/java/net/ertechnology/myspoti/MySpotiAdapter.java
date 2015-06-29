@@ -5,7 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -24,13 +27,14 @@ public class MySpotiAdapter extends ArrayAdapter<Artist> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.list_item_data, parent, false);
-        //View view = super.getView(position, convertView, parent);
         Artist item = getItem(position);
 
-        TextView image = (TextView) view.findViewById(R.id.list_item_image);
+        ImageView image = (ImageView) view.findViewById(R.id.list_item_image);
         TextView description = (TextView) view.findViewById(R.id.list_item_description);
 
-        image.setText(item.id);
+        if (item.images.size() > 0) {
+            Picasso.with(getContext()).load(item.images.get(0).url).into(image);
+        }
         description.setText(item.name);
 
         return view;
