@@ -9,13 +9,13 @@
             android:layout_weight="1"
             android:layout_gravity="center"
             android:src="@drawable/abc_ic_menu_selectall_mtrl_alpha"
-            android:contentDescription="" />
+            android:contentDescription="Artist Image" />
 
         <TextView
             android:id="@+id/list_item_description"
             style="@style/MyItem"
             android:layout_weight="2"
-            android:layout_gravity="left"
+            android:layout_gravity="center_vertical"
             android:text="Artist title" />
 
 </LinearLayout>
