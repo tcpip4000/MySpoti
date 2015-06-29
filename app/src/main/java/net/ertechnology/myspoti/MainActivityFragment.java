@@ -21,7 +21,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 
 
 /**
- * A placeholder fragment containing a simple view.
+ * Main activity fragment for myspoti.
  */
 public class MainActivityFragment extends Fragment {
 
@@ -70,7 +70,6 @@ public class MainActivityFragment extends Fragment {
             public void afterTextChanged(Editable s) {
                 Filter filter = mCustomAdapter.getFilter();
                 filter.filter(s.toString());
-                //Log.d("s is: ", s.toString());
             }
         });
     }
