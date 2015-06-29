@@ -61,17 +61,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void getTokenFromWeb(Activity activity) {
-        /// Auth
-
         AuthenticationRequest.Builder builder =
                 new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
         builder.setScopes(new String[]{"streaming"});
         AuthenticationRequest request = builder.build();
         AuthenticationClient.openLoginActivity(activity, REQUEST_CODE, request);
-        ///
-
-
-
     }
 
     @Override
@@ -89,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(LOG_TAG, "token");
                     // Handle successful response
                     mToken = response.getAccessToken();
-
                     break;
 
                 // Auth flow returned an error
