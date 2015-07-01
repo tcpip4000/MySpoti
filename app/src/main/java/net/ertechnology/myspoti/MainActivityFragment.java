@@ -1,6 +1,7 @@
 package net.ertechnology.myspoti;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.ListView;
@@ -53,6 +55,18 @@ public class MainActivityFragment extends Fragment {
             ListView listView = (ListView) getView().findViewById(R.id.main_listview);
             mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
             listView.setAdapter(mCustomAdapter);
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Artist item = mCustomAdapter.getItem(position);
+
+                    Intent intent = new Intent(getActivity(), HitActivity.class);
+                    intent.putExtra(HitActivity.HIT_ARTIST_ID, item.id);
+                    startActivity(intent);
+
+                }
+            });
 
             // Search button
             EditText search = (EditText) getView().findViewById(R.id.main_search);

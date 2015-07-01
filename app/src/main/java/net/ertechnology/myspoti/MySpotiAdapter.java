@@ -80,6 +80,8 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
     }
 
 
+
+
     private class CustomFilter extends Filter {
 
         /**
