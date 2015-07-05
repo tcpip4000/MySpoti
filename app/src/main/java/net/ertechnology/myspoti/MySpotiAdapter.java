@@ -38,7 +38,7 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_data, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_artist, parent, false);
 
             viewHolder = new ViewHolder();
             viewHolder.image = (ImageView) convertView.findViewById(R.id.list_item_image);

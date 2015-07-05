@@ -28,11 +28,12 @@ class HitAdapter extends ArrayAdapter<Track> implements Filterable {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_data, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_track, parent, false);
 
             viewHolder = new ViewHolder();
             viewHolder.image = (ImageView) convertView.findViewById(R.id.list_item_image);
-            viewHolder.description = (TextView) convertView.findViewById(R.id.list_item_description);
+            viewHolder.track = (TextView) convertView.findViewById(R.id.list_item_track);
+            viewHolder.album = (TextView) convertView.findViewById(R.id.list_item_album);
 
             convertView.setTag(viewHolder);
         } else {
@@ -43,13 +44,15 @@ class HitAdapter extends ArrayAdapter<Track> implements Filterable {
         if (item.album.images.size() > 0) {
             Picasso.with(getContext()).load(item.album.images.get(0).url).resize(250, 250).centerCrop().into(viewHolder.image);
         }
-        viewHolder.description.setText(item.name);
+        viewHolder.track.setText(item.name);
+        viewHolder.album.setText(item.album.name);
 
         return convertView;
     }
 
     private static class ViewHolder {
         public ImageView image;
-        public TextView description;
+        public TextView track;
+        public TextView album;
     }
 }
