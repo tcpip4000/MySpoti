@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,8 +24,7 @@ import kaaes.spotify.webapi.android.models.Tracks;
  */
 public class HitActivityFragment extends Fragment implements AsyncResponse {
 
-    private static String LOG_TAG = HitActivityFragment.class.getSimpleName();
-    private HitAdapter mAdapter;
+    private static final String LOG_TAG = HitActivityFragment.class.getSimpleName();
 
     public HitActivityFragment() {
     }
@@ -44,9 +44,16 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
 
     @Override
     public void processFinish(List<Track> tracks) {
-        ListView listView = (ListView) getView().findViewById(R.id.hit_listview);
-        mAdapter = new HitAdapter(getActivity(), tracks);
-        listView.setAdapter(mAdapter);
+        try {
+            ListView listView = (ListView) getView().findViewById(R.id.hit_listview);
+            HitAdapter mAdapter = new HitAdapter(getActivity(), tracks);
+            listView.setAdapter(mAdapter);
+            if (tracks.size() == 0) {
+                Toast.makeText(getActivity(), R.string.track_not_found, Toast.LENGTH_SHORT).show();
+            }
+        } catch (NullPointerException e) {
+            Log.e(LOG_TAG, "Error", e);
+        }
     }
 
     private static class GetTrackListTask extends AsyncTask<String, Void, List<Track>> {

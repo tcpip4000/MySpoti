@@ -79,9 +79,6 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
         return mFilter;
     }
 
-
-
-
     private class CustomFilter extends Filter {
 
         /**
@@ -114,8 +111,6 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
                     }
                 }
                 if (filteredList.size() == 0) {
-                    MainActivity activity = (MainActivity) getContext();
-                    //MainActivityFragment fragment = (MainActivityFragment) activity.getFragmentManager().findFragmentById(R.id.main_container);
                     ArtistsPager pager = MySession.getInstance().getSpotifyService().searchArtists(constraint.toString());
                     filteredList = pager.artists.items;
                     mOriginalValues = filteredList;
@@ -144,7 +139,9 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
                 notifyDataSetChanged();
             } else {
                 notifyDataSetInvalidated();
-                Toast.makeText(getContext(), R.string.data_not_found, Toast.LENGTH_SHORT).show();
+                if (!constraint.toString().isEmpty()) {
+                    Toast.makeText(getContext(), R.string.artist_not_found, Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }

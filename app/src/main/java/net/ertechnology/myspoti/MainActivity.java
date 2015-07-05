@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Get spoti conn
         SpotifyApi api = new SpotifyApi();
-        api.setAccessToken(this.getToken());
+        api.setAccessToken(mToken);
         SpotifyService mSpotify = api.getService();
 
         MySession.getInstance().setSpotifyService(mSpotify);
@@ -63,10 +63,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public String getToken() {
-        return mToken;
     }
 
     private static void getTokenFromWeb(Activity activity) {

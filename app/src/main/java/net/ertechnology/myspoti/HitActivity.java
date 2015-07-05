@@ -1,6 +1,5 @@
 package net.ertechnology.myspoti;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,18 +7,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.spotify.sdk.android.authentication.AuthenticationClient;
-import com.spotify.sdk.android.authentication.AuthenticationRequest;
-import com.spotify.sdk.android.authentication.AuthenticationResponse;
-
-import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyService;
-
 
 public class HitActivity extends AppCompatActivity {
 
     public static final String HIT_ARTIST_ID = "HIT_ARTIST_ID";
-    public static final String HIT_SPOTIFY_CONN = "HIT_SPOTIFY_CONN";
     private static final String LOG_TAG = HitActivity.class.getSimpleName();
     String mArtistId;
 

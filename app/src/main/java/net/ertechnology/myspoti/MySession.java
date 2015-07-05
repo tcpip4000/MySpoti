@@ -7,7 +7,7 @@ import kaaes.spotify.webapi.android.SpotifyService;
  */
 public class MySession {
 
-    private static MySession mInstance = new MySession();
+    private static final MySession mInstance = new MySession();
 
     private SpotifyService mSpotifyService;
 

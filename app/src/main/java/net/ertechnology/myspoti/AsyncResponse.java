@@ -7,6 +7,6 @@ import kaaes.spotify.webapi.android.models.Track;
 /**
  * Created by Juan on 05/07/2015.
  */
-public interface AsyncResponse {
+interface AsyncResponse {
     void processFinish(List<Track> tracks);
 }

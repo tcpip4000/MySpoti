@@ -16,8 +16,6 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
-import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 
 
@@ -36,9 +34,7 @@ public class MainActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
-
-        return view;
+        return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
     @Override
