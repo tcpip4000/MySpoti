@@ -1,32 +1,27 @@
 package net.ertechnology.myspoti;
 
-import android.support.v4.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import javax.security.auth.callback.Callback;
-
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Album;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
-import kaaes.spotify.webapi.android.models.TracksPager;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class HitActivityFragment extends Fragment {
+public class HitActivityFragment extends Fragment implements AsyncResponse {
 
     private static String LOG_TAG = HitActivityFragment.class.getSimpleName();
     private HitAdapter mAdapter;
@@ -39,28 +34,39 @@ public class HitActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_hit, container, false);
 
-        SpotifyService spotifyService = MySession.getInstance().getSpotifyService();
         Log.d(LOG_TAG, "ARTIST:" + ((HitActivity) getActivity()).mArtistId);
-        Map<String, Object> map = new HashMap<>();
-        map.put("country", "US");
-        spotifyService.getArtistTopTrack(((HitActivity) getActivity()).mArtistId, map, new retrofit.Callback<Tracks>() {
-            @Override
-            public void success(Tracks tracks, Response response) {
-                Log.d(LOG_TAG, response.getReason());
-                Log.d(LOG_TAG, tracks.toString());
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Log.d(LOG_TAG, error.toString());
-
-            }
-        });
-
-/*        ListView listView = (ListView) view.findViewById(R.id.hit_listview);
-        mAdapter = new HitAdapter(getActivity(), new ArrayList<>(Artist));
-        listView.setAdapter(mAdapter);*/
+        GetTrackListTask getTrackListTask = new GetTrackListTask();
+        getTrackListTask.delegate = this;
+        getTrackListTask.execute(((HitActivity) getActivity()).mArtistId);
 
         return view;
+    }
+
+    @Override
+    public void processFinish(List<Track> tracks) {
+        ListView listView = (ListView) getView().findViewById(R.id.hit_listview);
+        mAdapter = new HitAdapter(getActivity(), tracks);
+        listView.setAdapter(mAdapter);
+    }
+
+    private static class GetTrackListTask extends AsyncTask<String, Void, List<Track>> {
+
+        AsyncResponse delegate;
+
+        @Override
+        protected List<Track> doInBackground(String... params) {
+            Tracks tracks;
+            SpotifyService spotifyService = MySession.getInstance().getSpotifyService();
+            String artistId = params[0];
+            Map<String, Object> map = new HashMap<>();
+            map.put("country", "US");
+            tracks = spotifyService.getArtistTopTrack(artistId, map);
+            return tracks.tracks;
+        }
+
+        @Override
+        protected void onPostExecute(List<Track> tracks) {
+            delegate.processFinish(tracks);
+        }
     }
 }
