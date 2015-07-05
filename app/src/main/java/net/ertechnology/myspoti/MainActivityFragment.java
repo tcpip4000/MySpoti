@@ -28,7 +28,6 @@ public class MainActivityFragment extends Fragment {
 
     private static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     private MySpotiAdapter mCustomAdapter;
-    SpotifyService mSpotify;
 
     public MainActivityFragment() {
     }
@@ -38,11 +37,6 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_main, container, false);
-
-        // Set adapter
-        SpotifyApi api = new SpotifyApi();
-        api.setAccessToken(((MainActivity) getActivity()).getToken());
-        mSpotify = api.getService();
 
         return view;
     }

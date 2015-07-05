@@ -22,16 +22,16 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 /**
  * Created by Juan on 29/06/2015.
  */
-class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
+class HitAdapter extends ArrayAdapter<Artist> implements Filterable {
 
-    private CustomFilter mFilter;
+/*    private CustomFilter mFilter;
     private List<Artist> mObjects;
-    private List<Artist> mOriginalValues;
+    private List<Artist> mOriginalValues;*/
 
-    public MySpotiAdapter(Context context, List<Artist> objects) {
+    public HitAdapter(Context context, List<Artist> objects) {
         super(context, 0, objects);
-        mOriginalValues = objects;
-        mObjects = objects;
+/*        mOriginalValues = objects;
+        mObjects = objects;*/
     }
 
     @Override
@@ -58,7 +58,7 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
         return convertView;
     }
 
-    @Override
+    /*@Override
     public int getCount() {
         return mObjects.size();
     }
@@ -68,9 +68,9 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
         return mObjects.get(position);
     }
 
-    /**
+    *//**
      * {@inheritDoc}
-     */
+     *//*
     @Override
     public Filter getFilter() {
         if (mFilter == null) {
@@ -84,7 +84,7 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
 
     private class CustomFilter extends Filter {
 
-        /**
+        *//**
          * <p>Invoked in a worker thread to filter the data according to the
          * constraint. Subclasses must implement this method to perform the
          * filtering operation. Results computed by the filtering operation
@@ -101,7 +101,7 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
          * @see #filter(CharSequence, FilterListener)
          * @see #publishResults(CharSequence, FilterResults)
          * @see FilterResults
-         */
+         *//*
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             FilterResults results = new FilterResults();
@@ -115,8 +115,8 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
                 }
                 if (filteredList.size() == 0) {
                     MainActivity activity = (MainActivity) getContext();
-                    //MainActivityFragment fragment = (MainActivityFragment) activity.getFragmentManager().findFragmentById(R.id.main_container);
-                    ArtistsPager pager = MySession.getInstance().getSpotifyService().searchArtists(constraint.toString());
+                    MainActivityFragment fragment = (MainActivityFragment) activity.getFragmentManager().findFragmentById(R.id.main_container);
+                    ArtistsPager pager = fragment.mSpotify.searchArtists(constraint.toString());
                     filteredList = pager.artists.items;
                     mOriginalValues = filteredList;
                 }
@@ -126,7 +126,7 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
             return results;
         }
 
-        /**
+        *//**
          * <p>Invoked in the UI thread to publish the filtering results in the
          * user interface. Subclasses must implement this method to display the
          * results computed in {@link #performFiltering}.</p>
@@ -136,7 +136,7 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
          * @see #filter(CharSequence, FilterListener)
          * @see #performFiltering(CharSequence)
          * @see FilterResults
-         */
+         *//*
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             mObjects = (List<Artist>) results.values;
@@ -147,7 +147,7 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
                 Toast.makeText(getContext(), R.string.data_not_found, Toast.LENGTH_SHORT).show();
             }
         }
-    }
+    }*/
 
     private static class ViewHolder {
         public ImageView image;

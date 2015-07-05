@@ -4,6 +4,6 @@
     <string name="search_hint">Search Artist</string>
     <string name="data_not_found">Artist not found</string>
     <string name="list_item_default_description">Artist Image</string>
-    <string name="title_activity_hit">HitActivity</string>
+    <string name="title_activity_hit">Top 10 Tracks</string>
     <string name="hello_world">Hello world!</string>
 </resources>

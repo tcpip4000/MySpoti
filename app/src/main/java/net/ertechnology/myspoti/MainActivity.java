@@ -12,6 +12,9 @@ import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
+import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,11 +31,17 @@ public class MainActivity extends AppCompatActivity {
 
         getTokenFromWeb(this);
 
+        // Get spoti conn
+        SpotifyApi api = new SpotifyApi();
+        api.setAccessToken(this.getToken());
+        SpotifyService mSpotify = api.getService();
+
+        MySession.getInstance().setSpotifyService(mSpotify);
+
         getFragmentManager().beginTransaction().add(R.id.main_container, new MainActivityFragment())
                 .commit();
 
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
