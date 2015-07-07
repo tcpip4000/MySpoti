@@ -23,8 +23,10 @@ public class HitActivity extends AppCompatActivity {
         mArtistId = intent.getStringExtra(HIT_ARTIST_ID);
         Log.d(LOG_TAG, "Received id:" + mArtistId);
 
-        getSupportFragmentManager().beginTransaction().add(R.id.hit_container, new HitActivityFragment())
-                .commit();
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().add(R.id.hit_container, new HitActivityFragment())
+                    .commit();
+        }
 
     }
 

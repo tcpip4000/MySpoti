@@ -41,7 +41,7 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
 
         return view;
     }
-
+    // http://stackoverflow.com/questions/12503836/how-to-save-custom-arraylist-on-android-screen-rotate
     @Override
     public void processFinish(List<Track> tracks) {
         try {

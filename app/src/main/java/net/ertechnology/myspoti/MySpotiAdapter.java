@@ -60,12 +60,20 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
 
     @Override
     public int getCount() {
-        return mObjects.size();
+        int size = 0;
+        if (mObjects != null) {
+            size = mObjects.size();
+        }
+        return size;
     }
 
     @Override
     public Artist getItem(int position) {
-        return mObjects.get(position);
+        Artist artist = null;
+        if (position >= 0 && position < getCount()) {
+            artist = mObjects.get(position);
+        }
+        return artist;
     }
 
     /**
