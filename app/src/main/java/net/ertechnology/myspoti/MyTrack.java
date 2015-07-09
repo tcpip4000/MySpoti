@@ -99,9 +99,9 @@ public class MyTrack implements Parcelable {
 
     public static ArrayList<MyTrack> create(List<Track> tracks) {
         ArrayList<MyTrack> myTracks = new ArrayList<>();
-        List<String> imageUrls = new ArrayList<>();
 
         for (Track item : tracks) {
+            List<String> imageUrls = new ArrayList<>();
             for (Image image: item.album.images) {
                 imageUrls.add(image.url);
             }

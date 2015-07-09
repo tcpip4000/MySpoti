@@ -2,7 +2,6 @@ package net.ertechnology.myspoti;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,6 +27,7 @@ import retrofit.RetrofitError;
 public class HitActivityFragment extends Fragment implements AsyncResponse {
 
     private static final String LOG_TAG = HitActivityFragment.class.getSimpleName();
+    private static final String HIT_ACTIVITY_ARRAY = "HIT_ACTIVITY_ARRAY";
     private ArrayList<MyTrack> mTrackList;
 
     public HitActivityFragment() {
@@ -44,7 +44,7 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
             getTrackListTask.delegate = this;
             getTrackListTask.execute(((HitActivity) getActivity()).mArtistId);
         } else {
-            mTrackList = savedInstanceState.getParcelableArrayList("key");
+            mTrackList = savedInstanceState.getParcelableArrayList(HIT_ACTIVITY_ARRAY);
             ListView listView = (ListView) view.findViewById(R.id.hit_listview);
             HitAdapter mAdapter = new HitAdapter(getActivity(), mTrackList);
             listView.setAdapter(mAdapter);
@@ -74,7 +74,7 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
      */
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList("key", mTrackList);
+        outState.putParcelableArrayList(HIT_ACTIVITY_ARRAY, mTrackList);
         super.onSaveInstanceState(outState);
     }
 

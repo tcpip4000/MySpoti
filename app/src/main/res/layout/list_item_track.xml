@@ -19,14 +19,12 @@
         <TextView
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:id="@+id/list_item_track"
-            android:text="Track name"/>
+            android:id="@+id/list_item_track" />
 
         <TextView
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:id="@+id/list_item_album"
-            android:text="album name"/>
+            android:id="@+id/list_item_album" />
     </LinearLayout>
 
 </LinearLayout>

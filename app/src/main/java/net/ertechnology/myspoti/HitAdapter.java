@@ -13,8 +13,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import kaaes.spotify.webapi.android.models.Track;
-
 /**
  * Created by Juan on 29/06/2015.
  */
