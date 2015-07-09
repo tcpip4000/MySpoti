@@ -50,8 +50,10 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
         }
 
         Artist item = getItem(position);
-        if (item.images.size() > 0) {
+        if (item.images.size() > 0 && !item.images.get(0).url.isEmpty()) {
             Picasso.with(getContext()).load(item.images.get(0).url).resize(250, 250).centerCrop().into(viewHolder.image);
+        } else {
+            Picasso.with(getContext()).load(R.mipmap.ic_launcher).resize(250, 250).centerCrop().into(viewHolder.image);
         }
         viewHolder.description.setText(item.name);
 

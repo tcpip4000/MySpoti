@@ -13,6 +13,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -95,7 +96,7 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
                 Log.e(LOG_TAG, "Error", e);
             }
         } else {
-            Log.d(LOG_TAG, "Null track list received");
+            Log.d(LOG_TAG, "Network connection problem");
         }
     }
 
@@ -112,7 +113,11 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
                 SpotifyService spotifyService = MySession.getInstance().getSpotifyService();
                 String artistId = params[0];
                 Map<String, Object> map = new HashMap<>();
-                map.put("country", "US");
+                String defaultCountry = Locale.getDefault().getCountry();
+                if (defaultCountry.isEmpty()) {
+                    defaultCountry = "US";
+                }
+                map.put("country", defaultCountry);
                 tracksObject = spotifyService.getArtistTopTrack(artistId, map);
                 tracks = tracksObject.tracks;
                 myTracks = MyTrack.create(tracks);
