@@ -17,6 +17,7 @@ import java.util.Map;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
+import retrofit.RetrofitError;
 
 
 /**
@@ -44,15 +45,19 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
     // http://stackoverflow.com/questions/12503836/how-to-save-custom-arraylist-on-android-screen-rotate
     @Override
     public void processFinish(List<Track> tracks) {
-        try {
-            ListView listView = (ListView) getView().findViewById(R.id.hit_listview);
-            HitAdapter mAdapter = new HitAdapter(getActivity(), tracks);
-            listView.setAdapter(mAdapter);
-            if (tracks.size() == 0) {
-                Toast.makeText(getActivity(), R.string.track_not_found, Toast.LENGTH_SHORT).show();
+        if (tracks != null) {
+            try {
+                ListView listView = (ListView) getView().findViewById(R.id.hit_listview);
+                HitAdapter mAdapter = new HitAdapter(getActivity(), tracks);
+                listView.setAdapter(mAdapter);
+                if (tracks.size() == 0) {
+                    Toast.makeText(getActivity(), R.string.track_not_found, Toast.LENGTH_SHORT).show();
+                }
+            } catch (NullPointerException e) {
+                Log.e(LOG_TAG, "Error", e);
             }
-        } catch (NullPointerException e) {
-            Log.e(LOG_TAG, "Error", e);
+        } else {
+            Log.d(LOG_TAG, "Null track list received");
         }
     }
 
@@ -62,13 +67,20 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
 
         @Override
         protected List<Track> doInBackground(String... params) {
-            Tracks tracks;
-            SpotifyService spotifyService = MySession.getInstance().getSpotifyService();
-            String artistId = params[0];
-            Map<String, Object> map = new HashMap<>();
-            map.put("country", "US");
-            tracks = spotifyService.getArtistTopTrack(artistId, map);
-            return tracks.tracks;
+            Tracks tracksObject;
+            List<Track> tracks;
+            try {
+                SpotifyService spotifyService = MySession.getInstance().getSpotifyService();
+                String artistId = params[0];
+                Map<String, Object> map = new HashMap<>();
+                map.put("country", "US");
+                tracksObject = spotifyService.getArtistTopTrack(artistId, map);
+                tracks = tracksObject.tracks;
+            } catch (RetrofitError e) {
+                Log.e(LOG_TAG, "Error", e);
+                tracks = null;
+            }
+            return tracks;
         }
 
         @Override
