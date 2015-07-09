@@ -28,6 +28,7 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
 
     private static final String LOG_TAG = HitActivityFragment.class.getSimpleName();
     private static final String HIT_ACTIVITY_ARRAY = "HIT_ACTIVITY_ARRAY";
+    private HitAdapter mHitAdapter;
     private ArrayList<MyTrack> mTrackList;
 
     public HitActivityFragment() {
@@ -46,8 +47,8 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
         } else {
             mTrackList = savedInstanceState.getParcelableArrayList(HIT_ACTIVITY_ARRAY);
             ListView listView = (ListView) view.findViewById(R.id.hit_listview);
-            HitAdapter mAdapter = new HitAdapter(getActivity(), mTrackList);
-            listView.setAdapter(mAdapter);
+            mHitAdapter = new HitAdapter(getActivity(), mTrackList);
+            listView.setAdapter(mHitAdapter);
         }
 
         return view;
@@ -85,8 +86,8 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
             try {
                 mTrackList = tracks;
                 ListView listView = (ListView) getView().findViewById(R.id.hit_listview);
-                HitAdapter mAdapter = new HitAdapter(getActivity(), tracks);
-                listView.setAdapter(mAdapter);
+                mHitAdapter = new HitAdapter(getActivity(), mTrackList);
+                listView.setAdapter(mHitAdapter);
                 if (tracks.size() == 0) {
                     Toast.makeText(getActivity(), R.string.track_not_found, Toast.LENGTH_SHORT).show();
                 }
