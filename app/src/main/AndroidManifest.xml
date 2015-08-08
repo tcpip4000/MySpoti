@@ -22,14 +22,6 @@
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-        <activity
-            android:name=".HitActivity"
-            android:label="@string/title_activity_hit"
-            android:parentActivityName=".MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="net.ertechnology.myspoti.MainActivity" />
-        </activity>
     </application>
 
 </manifest>
