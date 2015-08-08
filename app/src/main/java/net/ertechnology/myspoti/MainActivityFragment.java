@@ -1,8 +1,8 @@
 package net.ertechnology.myspoti;
 
-import android.app.Fragment;
-import android.content.Intent;
+import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -27,7 +27,13 @@ public class MainActivityFragment extends Fragment {
     private static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     private MySpotiAdapter mCustomAdapter;
 
+    private MainFragmentListener mCallback;
+
     public MainActivityFragment() {
+    }
+
+    public interface MainFragmentListener {
+        public void onArtistClicked(String artistId);
     }
 
     @Override
@@ -35,6 +41,18 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         return inflater.inflate(R.layout.fragment_main, container, false);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mCallback = (MainFragmentListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() +
+                    "must implement MainFragmentListener");
+        }
     }
 
     @Override
@@ -51,9 +69,13 @@ public class MainActivityFragment extends Fragment {
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Artist item = mCustomAdapter.getItem(position);
 
+                    mCallback.onArtistClicked(item.id);
+
+/*
                     Intent intent = new Intent(getActivity(), HitActivity.class);
                     intent.putExtra(HitActivity.HIT_ARTIST_ID, item.id);
                     startActivity(intent);
+*/
 
                 }
             });

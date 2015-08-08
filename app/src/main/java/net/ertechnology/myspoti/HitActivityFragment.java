@@ -1,5 +1,6 @@
 package net.ertechnology.myspoti;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -27,10 +28,12 @@ import retrofit.RetrofitError;
  */
 public class HitActivityFragment extends Fragment implements AsyncResponse {
 
+    public static final String HIT_ARTIST_ID = "HIT_ARTIST_ID";
     private static final String LOG_TAG = HitActivityFragment.class.getSimpleName();
     private static final String HIT_ACTIVITY_ARRAY = "HIT_ACTIVITY_ARRAY";
     private HitAdapter mHitAdapter;
     private ArrayList<MyTrack> mTrackList;
+    private String mArtistId;
 
     public HitActivityFragment() {
     }
@@ -40,11 +43,17 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_hit, container, false);
 
+        mArtistId = getArguments().getString(HitActivityFragment.HIT_ARTIST_ID);
+
+        /*Intent intent = getActivity().getIntent();
+        mArtistId = intent.getStringExtra(HitActivityFragment.HIT_ARTIST_ID);*/
+        Log.d(LOG_TAG, "Received id:" + mArtistId);
+
         if (savedInstanceState == null) {
-            Log.d(LOG_TAG, "ARTIST:" + ((HitActivity) getActivity()).mArtistId);
+            Log.d(LOG_TAG, "ARTIST:" + mArtistId);
             GetTrackListTask getTrackListTask = new GetTrackListTask();
             getTrackListTask.delegate = this;
-            getTrackListTask.execute(((HitActivity) getActivity()).mArtistId);
+            getTrackListTask.execute(mArtistId);
         } else {
             mTrackList = savedInstanceState.getParcelableArrayList(HIT_ACTIVITY_ARRAY);
             ListView listView = (ListView) view.findViewById(R.id.hit_listview);

@@ -3,6 +3,8 @@ package net.ertechnology.myspoti;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -16,12 +18,14 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainActivityFragment.MainFragmentListener {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_CODE = 1337;
     private static final String REDIRECT_URI = "yourcustomprotocol://callback";
     private static final String CLIENT_ID = "22837230eb5045ba9826a6542c1c8169";
+    private static final String FRAGMENT_MAIN = "FRAGMENT_MAIN";
+    private static final String FRAGMENT_DETAIL = "FRAGMENT_DETAIL";
     private String mToken; // TODO: use app session
 
     @Override
@@ -38,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         MySession.getInstance().setSpotifyService(mSpotify);
 
-        getFragmentManager().beginTransaction().add(R.id.main_container, new MainActivityFragment())
+        getSupportFragmentManager().beginTransaction().add(R.id.main_container, new MainActivityFragment(), FRAGMENT_MAIN)
                 .commit();
 
     }
@@ -103,4 +107,19 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    @Override
+    public void onArtistClicked(String artistId) {
+        Fragment detailFragment = new HitActivityFragment();
+        Bundle args = new Bundle();
+        args.putString(HitActivityFragment.HIT_ARTIST_ID, artistId);
+        detailFragment.setArguments(args);
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.main_container, detailFragment, FRAGMENT_DETAIL);
+        ft.addToBackStack(null);
+        ft.commit();
+    }
+
+
 }
