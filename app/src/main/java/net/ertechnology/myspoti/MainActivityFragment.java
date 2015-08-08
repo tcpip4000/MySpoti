@@ -3,6 +3,7 @@ package net.ertechnology.myspoti;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -34,7 +35,7 @@ public class MainActivityFragment extends Fragment {
     }
 
     public interface MainFragmentListener {
-        public void onArtistClicked(String artistId);
+        void onArtistClicked(String artistId);
     }
 
     @Override
@@ -59,7 +60,10 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.app_name);
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(R.string.app_name);
+        }
     }
 
     @Override

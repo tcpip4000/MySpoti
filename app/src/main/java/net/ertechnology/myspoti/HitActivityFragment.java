@@ -1,9 +1,9 @@
 package net.ertechnology.myspoti;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,7 +34,6 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
     private static final String HIT_ACTIVITY_ARRAY = "HIT_ACTIVITY_ARRAY";
     private HitAdapter mHitAdapter;
     private ArrayList<MyTrack> mTrackList;
-    private String mArtistId;
 
     public HitActivityFragment() {
     }
@@ -44,18 +43,20 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_hit, container, false);
 
-        ((AppCompatActivity) getActivity()).getSupportActionBar()
-                .setTitle(getResources().getString(R.string.title_activity_hit));
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(getResources().getString(R.string.title_activity_hit));
+        }
 
-        mArtistId = getArguments().getString(HitActivityFragment.HIT_ARTIST_ID);
+        String artistId = getArguments().getString(HitActivityFragment.HIT_ARTIST_ID);
 
-        Log.d(LOG_TAG, "Received id:" + mArtistId);
+        Log.d(LOG_TAG, "Received id:" + artistId);
 
         if (savedInstanceState == null) {
-            Log.d(LOG_TAG, "ARTIST:" + mArtistId);
+            Log.d(LOG_TAG, "ARTIST:" + artistId);
             GetTrackListTask getTrackListTask = new GetTrackListTask();
             getTrackListTask.delegate = this;
-            getTrackListTask.execute(mArtistId);
+            getTrackListTask.execute(artistId);
         } else {
             mTrackList = savedInstanceState.getParcelableArrayList(HIT_ACTIVITY_ARRAY);
             ListView listView = (ListView) view.findViewById(R.id.hit_listview);

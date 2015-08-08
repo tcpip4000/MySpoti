@@ -26,8 +26,8 @@ public class MyTrack implements Parcelable {
         return mImages;
     }
 
-    private String mName;
-    private String mAlbumName;
+    private final String mName;
+    private final String mAlbumName;
     private List<String> mImages;
 
     public MyTrack(String name, String albumName, List<String> images) {
