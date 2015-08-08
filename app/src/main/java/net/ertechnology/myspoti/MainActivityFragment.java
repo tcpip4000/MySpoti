@@ -3,6 +3,7 @@ package net.ertechnology.myspoti;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -53,6 +54,12 @@ public class MainActivityFragment extends Fragment {
             throw new ClassCastException(activity.toString() +
                     "must implement MainFragmentListener");
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.app_name);
     }
 
     @Override

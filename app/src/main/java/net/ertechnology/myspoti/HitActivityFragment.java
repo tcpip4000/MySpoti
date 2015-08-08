@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,10 +44,11 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_hit, container, false);
 
+        ((AppCompatActivity) getActivity()).getSupportActionBar()
+                .setTitle(getResources().getString(R.string.title_activity_hit));
+
         mArtistId = getArguments().getString(HitActivityFragment.HIT_ARTIST_ID);
 
-        /*Intent intent = getActivity().getIntent();
-        mArtistId = intent.getStringExtra(HitActivityFragment.HIT_ARTIST_ID);*/
         Log.d(LOG_TAG, "Received id:" + mArtistId);
 
         if (savedInstanceState == null) {
