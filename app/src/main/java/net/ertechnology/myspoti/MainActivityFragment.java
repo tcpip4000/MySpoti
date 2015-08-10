@@ -82,12 +82,6 @@ public class MainActivityFragment extends Fragment {
 
                     mCallback.onArtistClicked(item.id);
 
-/*
-                    Intent intent = new Intent(getActivity(), HitActivity.class);
-                    intent.putExtra(HitActivity.HIT_ARTIST_ID, item.id);
-                    startActivity(intent);
-*/
-
                 }
             });
 

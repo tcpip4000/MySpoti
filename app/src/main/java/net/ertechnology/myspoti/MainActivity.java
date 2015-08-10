@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     private static final String FRAGMENT_MAIN = "FRAGMENT_MAIN";
     private static final String FRAGMENT_DETAIL = "FRAGMENT_DETAIL";
     private String mToken; // TODO: use app session
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +40,23 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         SpotifyApi api = new SpotifyApi();
         api.setAccessToken(mToken);
         SpotifyService mSpotify = api.getService();
-
         MySession.getInstance().setSpotifyService(mSpotify);
 
-        getSupportFragmentManager().beginTransaction().add(R.id.main_container, new MainActivityFragment(), FRAGMENT_MAIN)
+        // Dynamic fill main fragment
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.main_container, new MainActivityFragment(), FRAGMENT_MAIN)
                 .commit();
+
+        if (findViewById(R.id.detail_container) == null) {
+            mTwoPane = false;
+        } else {
+            mTwoPane = true;
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.detail_container, new HitActivityFragment(), FRAGMENT_DETAIL)
+                        .commit();
+            }
+        }
 
     }
 
