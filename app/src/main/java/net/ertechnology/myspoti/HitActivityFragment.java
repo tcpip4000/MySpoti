@@ -38,6 +38,24 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
     public HitActivityFragment() {
     }
 
+    public static HitActivityFragment newInstance(String artistId) {
+        HitActivityFragment hitActivityFragment = new HitActivityFragment();
+
+        Bundle args = new Bundle();
+        args.putString(HIT_ARTIST_ID, artistId);
+        hitActivityFragment.setArguments(args);
+
+        return hitActivityFragment;
+    }
+
+    public String getArtistId() {
+        if (getArguments() != null) {
+            return getArguments().getString(HIT_ARTIST_ID);
+        } else {
+            return  null;
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -49,15 +67,16 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
         }
 
         //String artistId = getArguments().getString(HitActivityFragment.HIT_ARTIST_ID); // TODO Fix this
-        String artistId = "0EmeFodog0BfCgMzAIvKQp";
-
-        Log.d(LOG_TAG, "Received id:" + artistId);
+        //String artistId = "0EmeFodog0BfCgMzAIvKQp";
 
         if (savedInstanceState == null) {
-            Log.d(LOG_TAG, "ARTIST:" + artistId);
-            GetTrackListTask getTrackListTask = new GetTrackListTask();
-            getTrackListTask.delegate = this;
-            getTrackListTask.execute(artistId);
+            String artistId = getArtistId();
+            if (artistId != null) {
+                Log.d(LOG_TAG, "Received id:" + artistId);
+                GetTrackListTask getTrackListTask = new GetTrackListTask();
+                getTrackListTask.delegate = this;
+                getTrackListTask.execute(artistId);
+            }
         } else {
             mTrackList = savedInstanceState.getParcelableArrayList(HIT_ACTIVITY_ARRAY);
             ListView listView = (ListView) view.findViewById(R.id.hit_listview);

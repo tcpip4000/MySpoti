@@ -3,7 +3,6 @@ package net.ertechnology.myspoti;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -126,13 +125,21 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     @Override
     public void onArtistClicked(String artistId) {
         Log.d(LOG_TAG, "artist id:" + artistId);
-        Fragment detailFragment = new HitActivityFragment();
+        int targetLayout;
+
+        HitActivityFragment hitActivityFragment = HitActivityFragment.newInstance(artistId);
+        /*Fragment detailFragment = new HitActivityFragment();
         Bundle args = new Bundle();
         args.putString(HitActivityFragment.HIT_ARTIST_ID, artistId);
-        detailFragment.setArguments(args);
+        detailFragment.setArguments(args);*/
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.main_container, detailFragment, FRAGMENT_DETAIL);
+        if (mTwoPane) {
+            targetLayout = R.id.detail_container;
+        } else {
+            targetLayout = R.id.main_container;
+        }
+        ft.replace(targetLayout, hitActivityFragment, FRAGMENT_DETAIL);
         ft.addToBackStack(null);
         ft.commit();
     }
