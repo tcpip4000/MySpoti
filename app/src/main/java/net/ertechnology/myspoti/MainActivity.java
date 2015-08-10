@@ -43,9 +43,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         MySession.getInstance().setSpotifyService(mSpotify);
 
         // Dynamic fill main fragment
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.main_container, new MainActivityFragment(), FRAGMENT_MAIN)
-                .commit();
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.main_container, new MainActivityFragment(), FRAGMENT_MAIN)
+                    .commit();
+        }
 
         if (findViewById(R.id.detail_container) == null) {
             mTwoPane = false;
@@ -123,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
     @Override
     public void onArtistClicked(String artistId) {
+        Log.d(LOG_TAG, "artist id:" + artistId);
         Fragment detailFragment = new HitActivityFragment();
         Bundle args = new Bundle();
         args.putString(HitActivityFragment.HIT_ARTIST_ID, artistId);

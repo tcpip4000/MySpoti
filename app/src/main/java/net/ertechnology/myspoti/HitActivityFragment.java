@@ -48,7 +48,8 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
             actionBar.setTitle(getResources().getString(R.string.title_activity_hit));
         }
 
-        String artistId = getArguments().getString(HitActivityFragment.HIT_ARTIST_ID); // TODO Fix this
+        //String artistId = getArguments().getString(HitActivityFragment.HIT_ARTIST_ID); // TODO Fix this
+        String artistId = "0EmeFodog0BfCgMzAIvKQp";
 
         Log.d(LOG_TAG, "Received id:" + artistId);
 
