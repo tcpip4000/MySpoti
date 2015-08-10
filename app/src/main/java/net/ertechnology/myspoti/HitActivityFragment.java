@@ -48,7 +48,7 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
         return hitActivityFragment;
     }
 
-    public String getArtistId() {
+    private String getArtistId() {
         if (getArguments() != null) {
             return getArguments().getString(HIT_ARTIST_ID);
         } else {

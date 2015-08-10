@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
@@ -33,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        int choiceModel;
+
         getTokenFromWeb(this);
 
         // Get spoti conn
@@ -41,22 +44,25 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         SpotifyService mSpotify = api.getService();
         MySession.getInstance().setSpotifyService(mSpotify);
 
-        // Dynamic fill main fragment
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.main_container, new MainActivityFragment(), FRAGMENT_MAIN)
-                    .commit();
-        }
-
+        // Dynamic fill detail fragment
         if (findViewById(R.id.detail_container) == null) {
             mTwoPane = false;
+            choiceModel = ListView.CHOICE_MODE_NONE;
         } else {
             mTwoPane = true;
+            choiceModel = ListView.CHOICE_MODE_NONE;
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.detail_container, new HitActivityFragment(), FRAGMENT_DETAIL)
                         .commit();
             }
+        }
+
+        // Dynamic fill main fragment
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.main_container, MainActivityFragment.newInstance(choiceModel), FRAGMENT_MAIN)
+                    .commit();
         }
 
     }
@@ -128,11 +134,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         int targetLayout;
 
         HitActivityFragment hitActivityFragment = HitActivityFragment.newInstance(artistId);
-        /*Fragment detailFragment = new HitActivityFragment();
-        Bundle args = new Bundle();
-        args.putString(HitActivityFragment.HIT_ARTIST_ID, artistId);
-        detailFragment.setArguments(args);*/
-
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         if (mTwoPane) {
             targetLayout = R.id.detail_container;

@@ -27,6 +27,7 @@ import kaaes.spotify.webapi.android.models.Artist;
 public class MainActivityFragment extends Fragment {
 
     private static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
+    private static final String MAIN_ACTIVITY_CHOICE = "MACTCHO";
     private MySpotiAdapter mCustomAdapter;
 
     private MainFragmentListener mCallback;
@@ -36,6 +37,18 @@ public class MainActivityFragment extends Fragment {
 
     public interface MainFragmentListener {
         void onArtistClicked(String artistId);
+    }
+
+    public static MainActivityFragment newInstance(int choiceMode) {
+        MainActivityFragment mainActivityFragment = new MainActivityFragment();
+        Bundle args = new Bundle();
+        args.putInt(MAIN_ACTIVITY_CHOICE, choiceMode);
+        mainActivityFragment.setArguments(args);
+        return mainActivityFragment;
+    }
+
+    private int getChoiceMode() {
+        return getArguments().getInt(MAIN_ACTIVITY_CHOICE);
     }
 
     @Override
@@ -74,6 +87,7 @@ public class MainActivityFragment extends Fragment {
             ListView listView = (ListView) getView().findViewById(R.id.main_listview);
             mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
             listView.setAdapter(mCustomAdapter);
+            listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
