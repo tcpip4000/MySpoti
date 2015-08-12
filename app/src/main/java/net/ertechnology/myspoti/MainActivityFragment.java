@@ -84,18 +84,16 @@ public class MainActivityFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         try {
             // Set adapter
-            ListView listView = (ListView) getView().findViewById(R.id.main_listview);
+            final ListView listView = (ListView) getView().findViewById(R.id.main_listview);
+            listView.setChoiceMode(getArguments().getInt(MAIN_ACTIVITY_CHOICE));
             mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
             listView.setAdapter(mCustomAdapter);
-            listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Artist item = mCustomAdapter.getItem(position);
-
                     mCallback.onArtistClicked(item.id);
-
                 }
             });
 

@@ -11,6 +11,10 @@
         <item name="android:orientation">horizontal</item>
     </style>
 
+    <style name="MyItemListArtist" parent="MyItemList">
+        <item name="android:background">@drawable/touch_selector</item>
+    </style>
+
     <style name="MyItem">
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">0dp</item>

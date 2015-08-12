@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             choiceModel = ListView.CHOICE_MODE_NONE;
         } else {
             mTwoPane = true;
-            choiceModel = ListView.CHOICE_MODE_NONE;
+            choiceModel = ListView.CHOICE_MODE_SINGLE;
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.detail_container, new HitActivityFragment(), FRAGMENT_DETAIL)

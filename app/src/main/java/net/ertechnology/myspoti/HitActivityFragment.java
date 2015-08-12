@@ -118,11 +118,13 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
         if (tracks != null) {
             try {
                 mTrackList = tracks;
-                ListView listView = (ListView) getView().findViewById(R.id.hit_listview);
-                mHitAdapter = new HitAdapter(getActivity(), mTrackList);
-                listView.setAdapter(mHitAdapter);
-                if (tracks.size() == 0) {
-                    Toast.makeText(getActivity(), R.string.track_not_found, Toast.LENGTH_SHORT).show();
+                if (getView() != null) {
+                    ListView listView = (ListView) getView().findViewById(R.id.hit_listview);
+                    mHitAdapter = new HitAdapter(getActivity(), mTrackList);
+                    listView.setAdapter(mHitAdapter);
+                    if (tracks.size() == 0) {
+                        Toast.makeText(getActivity(), R.string.track_not_found, Toast.LENGTH_SHORT).show();
+                    }
                 }
             } catch (NullPointerException e) {
                 Log.e(LOG_TAG, "Error", e);
