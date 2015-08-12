@@ -2,6 +2,7 @@
 <resources>
 
     <style name="MyItemListArtist" parent="MyItemList">
+        <item name="android:background">@drawable/touch_selector</item>
     </style>
 
 </resources>

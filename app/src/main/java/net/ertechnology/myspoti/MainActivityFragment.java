@@ -85,7 +85,7 @@ public class MainActivityFragment extends Fragment {
         try {
             // Set adapter
             final ListView listView = (ListView) getView().findViewById(R.id.main_listview);
-            listView.setChoiceMode(getArguments().getInt(MAIN_ACTIVITY_CHOICE));
+            listView.setChoiceMode(getChoiceMode());
             mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
             listView.setAdapter(mCustomAdapter);
 
