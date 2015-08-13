@@ -16,20 +16,23 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.ArtistsPager;
 
 /**
  * Created by Juan on 29/06/2015.
  */
-class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
+class MySpotiAdapter extends ArrayAdapter<MyArtist> implements Filterable {
 
     private CustomFilter mFilter;
-    private List<Artist> mObjects;
-    private List<Artist> mOriginalValues;
+    private List<MyArtist> mObjects;
+    private List<MyArtist> mOriginalValues;
 
-    public MySpotiAdapter(Context context, List<Artist> objects) {
+    public MySpotiAdapter(Context context, List<MyArtist> objects) {
         super(context, 0, objects);
+        mOriginalValues = objects;
+        mObjects = objects;
+    }
+
+    public void setObjects(List<MyArtist> objects) {
         mOriginalValues = objects;
         mObjects = objects;
     }
@@ -49,13 +52,13 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        Artist item = getItem(position);
-        if (item.images.size() > 0 && !item.images.get(0).url.isEmpty()) {
-            Picasso.with(getContext()).load(item.images.get(0).url).resize(250, 250).centerCrop().into(viewHolder.image);
+        MyArtist item = getItem(position);
+        if (item.getImages().size() > 0 && !item.getImages().get(0).isEmpty()) {
+            Picasso.with(getContext()).load(item.getImages().get(0)).resize(250, 250).centerCrop().into(viewHolder.image);
         } else {
             Picasso.with(getContext()).load(R.mipmap.ic_launcher).resize(250, 250).centerCrop().into(viewHolder.image);
         }
-        viewHolder.description.setText(item.name);
+        viewHolder.description.setText(item.getName());
 
         return convertView;
     }
@@ -70,8 +73,8 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
     }
 
     @Override
-    public Artist getItem(int position) {
-        Artist artist = null;
+    public MyArtist getItem(int position) {
+        MyArtist artist = null;
         if (position >= 0 && position < getCount()) {
             artist = mObjects.get(position);
         }
@@ -112,19 +115,19 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             FilterResults results = new FilterResults();
-            List<Artist> filteredList = new ArrayList<>();
+            List<MyArtist> filteredList = new ArrayList<>();
             String constraintLower = constraint.toString().toLowerCase();
             if (constraint.toString().length() > 0) {
-                for (Artist artist : mOriginalValues) {
-                    if (artist.name.toLowerCase().contains(constraintLower)) {
+                for (MyArtist artist : mOriginalValues) {
+                    if (artist.getName().toLowerCase().contains(constraintLower)) {
                         filteredList.add(artist);
                     }
                 }
-                if (filteredList.size() == 0) {
+                /*if (filteredList.size() == 0) {
                     ArtistsPager pager = MySession.getInstance().getSpotifyService().searchArtists(constraint.toString());
                     filteredList = pager.artists.items;
                     mOriginalValues = filteredList;
-                }
+                }*/
             }
             results.count = filteredList.size();
             results.values = filteredList;
@@ -144,7 +147,7 @@ class MySpotiAdapter extends ArrayAdapter<Artist> implements Filterable {
          */
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-            mObjects = (List<Artist>) results.values;
+            mObjects = (List<MyArtist>) results.values;
             if (results.count > 0) {
                 notifyDataSetChanged();
             } else {

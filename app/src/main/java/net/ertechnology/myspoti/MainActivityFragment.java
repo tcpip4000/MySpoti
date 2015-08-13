@@ -1,6 +1,7 @@
 package net.ertechnology.myspoti;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -13,26 +14,32 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.Filter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.ArtistsPager;
+import retrofit.RetrofitError;
 
 
 /**
  * Main activity fragment for myspoti.
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment implements AsyncResponseArtists {
 
     private static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     private static final String MAIN_ACTIVITY_CHOICE = "MACTCHO";
     private static final String ARTIST_LIST_POSITION = "ARTLPOS";
+    private static final String ARTIST_LIST = "ARTLST";
+    private ArrayList<MyArtist> mArtistList;
     private MySpotiAdapter mCustomAdapter;
 
     private MainFragmentListener mCallback;
-    private int mSelectedPosition = -1;
+    private int mSelectedPosition;
+    ListView mListView;
 
     public MainActivityFragment() {
     }
@@ -58,29 +65,35 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         try {
-            final ListView listView = (ListView) view.findViewById(R.id.main_listview);
-            listView.setChoiceMode(getChoiceMode());
-            mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
+            mListView = (ListView) view.findViewById(R.id.main_listview);
+            mListView.setChoiceMode(getChoiceMode());
 
             if (savedInstanceState == null) {
-                // Set adapter
-                mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
+                mArtistList = new ArrayList<>();
+                mSelectedPosition = ListView.INVALID_POSITION;
             } else {
-                mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>()); // XXX fix
+                mArtistList = savedInstanceState.getParcelableArrayList(ARTIST_LIST);
                 mSelectedPosition = savedInstanceState.getInt(ARTIST_LIST_POSITION);
-                listView.setItemChecked(mSelectedPosition, true);
-                listView.smoothScrollToPosition(mSelectedPosition);
+
             }
 
-            listView.setAdapter(mCustomAdapter);
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            mCustomAdapter = new MySpotiAdapter(getActivity(), mArtistList);
+            mListView.setAdapter(mCustomAdapter);
+
+            mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Artist item = mCustomAdapter.getItem(position);
+                    MyArtist item = mCustomAdapter.getItem(position);
                     mSelectedPosition = position;
-                    mCallback.onArtistClicked(item.id);
+                    mCallback.onArtistClicked(item.getId());
                 }
             });
+
+            if (mSelectedPosition != ListView.INVALID_POSITION) {
+                mListView.setSelection(mSelectedPosition);
+                mListView.setItemChecked(mSelectedPosition, true);
+            }
+
 
             // Search button
             final EditText search = (EditText) view.findViewById(R.id.main_search);
@@ -95,8 +108,11 @@ public class MainActivityFragment extends Fragment {
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    Filter filter = mCustomAdapter.getFilter();
-                    filter.filter(s.toString());
+/*                    Filter filter = mCustomAdapter.getFilter();
+                    filter.filter(s.toString());*/
+                    GetArtistListTask getArtistListTask = new GetArtistListTask();
+                    getArtistListTask.delegate = (AsyncResponseArtists) getActivity().getSupportFragmentManager().findFragmentByTag(MainActivity.FRAGMENT_MAIN);
+                    getArtistListTask.execute(s.toString());
                 }
             });
         } catch (NullPointerException e) {
@@ -126,57 +142,58 @@ public class MainActivityFragment extends Fragment {
         }
     }
 
- /*   @Override
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(ARTIST_LIST_POSITION, mSelectedPosition);
+        outState.putParcelableArrayList(ARTIST_LIST, mArtistList);
         super.onSaveInstanceState(outState);
-    }*/
+    }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        /*try {
-            final ListView listView = (ListView) getView().findViewById(R.id.main_listview);
-            if (savedInstanceState == null) {
-                // Set adapter
-                listView.setChoiceMode(getChoiceMode());
-                mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
-                listView.setAdapter(mCustomAdapter);
-
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Artist item = mCustomAdapter.getItem(position);
-                        mSelectedPosition = position;
-                        mCallback.onArtistClicked(item.id);
+    public void processFinish(ArrayList<MyArtist> myArtists) {
+        if (myArtists != null) {
+            try {
+                mArtistList = myArtists;
+                if (getView() != null) {
+                    mCustomAdapter.clear();
+                    mCustomAdapter.addAll(mArtistList);
+                    if (myArtists.size() == 0) {
+                        Toast.makeText(getActivity(), R.string.artist_not_found, Toast.LENGTH_SHORT).show();
                     }
-                });
-
-                // Search button
-                EditText search = (EditText) getView().findViewById(R.id.main_search);
-                search.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        Filter filter = mCustomAdapter.getFilter();
-                        filter.filter(s.toString());
-                    }
-                });
-            } else {
-                mSelectedPosition = savedInstanceState.getInt(ARTIST_LIST_POSITION);
-                listView.setItemChecked(mSelectedPosition, true);
-                listView.smoothScrollToPosition(mSelectedPosition);
+                }
+            } catch (NullPointerException e) {
+                Log.e(LOG_TAG, "Error", e);
             }
-        } catch (NullPointerException e) {
-            Log.d(LOG_TAG, "Error", e);
-        }*/
+        } else {
+            Log.d(LOG_TAG, "Network connection problem");
+        }
+    }
+
+    private static class GetArtistListTask extends AsyncTask<String, Void, ArrayList<MyArtist>> {
+
+        AsyncResponseArtists delegate;
+
+        @Override
+        protected ArrayList<MyArtist> doInBackground(String... params) {
+            ArrayList<MyArtist> myArtists;
+            try {
+                String searchString = params[0];
+
+                ArtistsPager pager = MySession.getInstance().getSpotifyService().searchArtists(searchString);
+                List<Artist> artists = pager.artists.items;
+                myArtists = MyArtist.create(artists);
+
+            } catch (RetrofitError e) {
+                Log.e(LOG_TAG, "Error", e);
+                myArtists = null;
+            }
+            return myArtists;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<MyArtist> myArtists) {
+            delegate.processFinish(myArtists);
+        }
     }
 
 }
