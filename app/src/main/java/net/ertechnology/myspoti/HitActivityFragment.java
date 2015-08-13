@@ -2,7 +2,6 @@ package net.ertechnology.myspoti;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -30,7 +29,7 @@ import retrofit.RetrofitError;
  */
 public class HitActivityFragment extends Fragment implements AsyncResponse {
 
-    public static final String HIT_ARTIST_ID = "HIT_ARTIST_ID";
+    private static final String HIT_ARTIST_ID = "HIT_ARTIST_ID";
     private static final String LOG_TAG = HitActivityFragment.class.getSimpleName();
     private static final String HIT_ACTIVITY_ARRAY = "HIT_ACTIVITY_ARRAY";
     private HitAdapter mHitAdapter;

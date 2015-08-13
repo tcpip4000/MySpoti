@@ -39,7 +39,7 @@ public class MainActivityFragment extends Fragment implements AsyncResponseArtis
 
     private MainFragmentListener mCallback;
     private int mSelectedPosition;
-    ListView mListView;
+    private ListView mListView;
 
     public MainActivityFragment() {
     }

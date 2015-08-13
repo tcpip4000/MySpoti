@@ -36,7 +36,7 @@ public class MyArtist implements Parcelable{
         mImages = images;
     }
 
-    public MyArtist(Parcel in) {
+    private MyArtist(Parcel in) {
         mId = in.readString();
         mName = in.readString();
         in.readList(mImages, null);

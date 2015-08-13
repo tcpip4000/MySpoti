@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     private static final String REDIRECT_URI = "yourcustomprotocol://callback";
     private static final String CLIENT_ID = "22837230eb5045ba9826a6542c1c8169";
     public static final String FRAGMENT_MAIN = "FRAGMENT_MAIN";
-    public static final String FRAGMENT_DETAIL = "FRAGMENT_DETAIL";
+    private static final String FRAGMENT_DETAIL = "FRAGMENT_DETAIL";
     private String mToken; // TODO: use app session
     private boolean mTwoPane;
 
