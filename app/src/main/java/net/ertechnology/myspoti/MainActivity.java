@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     private String mToken; // TODO: use app session
     private boolean mTwoPane;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

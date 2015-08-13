@@ -2,6 +2,7 @@ package net.ertechnology.myspoti;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -76,13 +77,16 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
             }
         } else {
             mTrackList = savedInstanceState.getParcelableArrayList(HIT_ACTIVITY_ARRAY);
-            ListView listView = (ListView) view.findViewById(R.id.hit_listview);
-            mHitAdapter = new HitAdapter(getActivity(), mTrackList);
-            listView.setAdapter(mHitAdapter);
+            if (mTrackList != null) {
+                ListView listView = (ListView) view.findViewById(R.id.hit_listview);
+                mHitAdapter = new HitAdapter(getActivity(), mTrackList);
+                listView.setAdapter(mHitAdapter);
+            }
         }
 
         return view;
     }
+
 
     /**
      * Called to ask the fragment to save its current dynamic state, so it

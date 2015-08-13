@@ -28,9 +28,11 @@ public class MainActivityFragment extends Fragment {
 
     private static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     private static final String MAIN_ACTIVITY_CHOICE = "MACTCHO";
+    private static final String ARTIST_LIST_POSITION = "ARTLPOS";
     private MySpotiAdapter mCustomAdapter;
 
     private MainFragmentListener mCallback;
+    private int mSelectedPosition = -1;
 
     public MainActivityFragment() {
     }
@@ -54,8 +56,53 @@ public class MainActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        try {
+            final ListView listView = (ListView) view.findViewById(R.id.main_listview);
+            listView.setChoiceMode(getChoiceMode());
+            mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
 
-        return inflater.inflate(R.layout.fragment_main, container, false);
+            if (savedInstanceState == null) {
+                // Set adapter
+                mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
+            } else {
+                mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>()); // XXX fix
+                mSelectedPosition = savedInstanceState.getInt(ARTIST_LIST_POSITION);
+                listView.setItemChecked(mSelectedPosition, true);
+                listView.smoothScrollToPosition(mSelectedPosition);
+            }
+
+            listView.setAdapter(mCustomAdapter);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Artist item = mCustomAdapter.getItem(position);
+                    mSelectedPosition = position;
+                    mCallback.onArtistClicked(item.id);
+                }
+            });
+
+            // Search button
+            final EditText search = (EditText) view.findViewById(R.id.main_search);
+            search.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    Filter filter = mCustomAdapter.getFilter();
+                    filter.filter(s.toString());
+                }
+            });
+        } catch (NullPointerException e) {
+            Log.d(LOG_TAG, "Error", e);
+        }
+        return view;
     }
 
     @Override
@@ -79,44 +126,57 @@ public class MainActivityFragment extends Fragment {
         }
     }
 
+ /*   @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putInt(ARTIST_LIST_POSITION, mSelectedPosition);
+        super.onSaveInstanceState(outState);
+    }*/
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        try {
-            // Set adapter
+        /*try {
             final ListView listView = (ListView) getView().findViewById(R.id.main_listview);
-            listView.setChoiceMode(getChoiceMode());
-            mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
-            listView.setAdapter(mCustomAdapter);
+            if (savedInstanceState == null) {
+                // Set adapter
+                listView.setChoiceMode(getChoiceMode());
+                mCustomAdapter = new MySpotiAdapter(getActivity(), new ArrayList<Artist>());
+                listView.setAdapter(mCustomAdapter);
 
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Artist item = mCustomAdapter.getItem(position);
-                    mCallback.onArtistClicked(item.id);
-                }
-            });
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        Artist item = mCustomAdapter.getItem(position);
+                        mSelectedPosition = position;
+                        mCallback.onArtistClicked(item.id);
+                    }
+                });
 
-            // Search button
-            EditText search = (EditText) getView().findViewById(R.id.main_search);
-            search.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
+                // Search button
+                EditText search = (EditText) getView().findViewById(R.id.main_search);
+                search.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
 
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                }
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    }
 
-                @Override
-                public void afterTextChanged(Editable s) {
-                    Filter filter = mCustomAdapter.getFilter();
-                    filter.filter(s.toString());
-                }
-            });
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        Filter filter = mCustomAdapter.getFilter();
+                        filter.filter(s.toString());
+                    }
+                });
+            } else {
+                mSelectedPosition = savedInstanceState.getInt(ARTIST_LIST_POSITION);
+                listView.setItemChecked(mSelectedPosition, true);
+                listView.smoothScrollToPosition(mSelectedPosition);
+            }
         } catch (NullPointerException e) {
             Log.d(LOG_TAG, "Error", e);
-        }
+        }*/
     }
 
 }
