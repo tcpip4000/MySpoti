@@ -34,12 +34,14 @@ public class MainActivityFragment extends Fragment implements AsyncResponseArtis
     private static final String MAIN_ACTIVITY_CHOICE = "MACTCHO";
     private static final String ARTIST_LIST_POSITION = "ARTLPOS";
     private static final String ARTIST_LIST = "ARTLST";
+    private static final String ARTIST_SEARCH = "ARTSE";
     private ArrayList<MyArtist> mArtistList;
     private MySpotiAdapter mCustomAdapter;
 
     private MainFragmentListener mCallback;
     private int mSelectedPosition;
     private ListView mListView;
+    private String mArtistSearch;
 
     public MainActivityFragment() {
     }
@@ -71,9 +73,11 @@ public class MainActivityFragment extends Fragment implements AsyncResponseArtis
             if (savedInstanceState == null) {
                 mArtistList = new ArrayList<>();
                 mSelectedPosition = ListView.INVALID_POSITION;
+                mArtistSearch = "";
             } else {
                 mArtistList = savedInstanceState.getParcelableArrayList(ARTIST_LIST);
                 mSelectedPosition = savedInstanceState.getInt(ARTIST_LIST_POSITION);
+                mArtistSearch = savedInstanceState.getString(ARTIST_SEARCH);
 
             }
 
@@ -110,9 +114,10 @@ public class MainActivityFragment extends Fragment implements AsyncResponseArtis
                 public void afterTextChanged(Editable s) {
 /*                    Filter filter = mCustomAdapter.getFilter();
                     filter.filter(s.toString());*/
+                    mArtistSearch = s.toString();
                     GetArtistListTask getArtistListTask = new GetArtistListTask();
                     getArtistListTask.delegate = (AsyncResponseArtists) getActivity().getSupportFragmentManager().findFragmentByTag(MainActivity.FRAGMENT_MAIN);
-                    getArtistListTask.execute(s.toString());
+                    getArtistListTask.execute(mArtistSearch);
                 }
             });
         } catch (NullPointerException e) {
@@ -146,6 +151,7 @@ public class MainActivityFragment extends Fragment implements AsyncResponseArtis
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(ARTIST_LIST_POSITION, mSelectedPosition);
         outState.putParcelableArrayList(ARTIST_LIST, mArtistList);
+        outState.putString(ARTIST_SEARCH, mArtistSearch);
         super.onSaveInstanceState(outState);
     }
 
