@@ -54,7 +54,7 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
     }
 
     public interface HitActivityListener {
-        void hitListener(MyTrack myTrack);
+        void hitListener(MyTrack myTrack, String artistId);
     }
 
     public static HitActivityFragment newInstance(String artistId) {
@@ -113,7 +113,7 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MyTrack myTrack = mHitAdapter.getItem(position);
-                mCallback.hitListener(myTrack);
+                mCallback.hitListener(myTrack, getArtistId());
             }
         });
 

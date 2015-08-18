@@ -45,19 +45,22 @@
                 android:id="@+id/player_back"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:src="@android:drawable/ic_media_previous"/>
 
             <ImageButton
                 android:id="@+id/player_play_stop"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:src="@android:drawable/ic_media_play"/>
 
             <ImageButton
                 android:id="@+id/player_next"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:src="@android:drawable/ic_media_next"/>
 
         </LinearLayout>
 

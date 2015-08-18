@@ -148,8 +148,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
 
     @Override
-    public void hitListener(MyTrack myTrack) {
+    public void hitListener(MyTrack myTrack, String artistId) {
         Intent intent = new Intent(this, PlayerActivity.class);
+        intent.putExtra(PlayerActivity.PLAYER_ARTIST_ID, artistId);
+        //intent.putExtra(PlayerActivity.PLAYER_TRACK, myTrack);
         startActivity(intent);
     }
 }
