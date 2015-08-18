@@ -130,11 +130,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     }
 
     @Override
-    public void onArtistClicked(String artistId) {
+    public void onArtistClicked(String artistId, String artistName) {
         Log.d(LOG_TAG, "artist id:" + artistId);
         int targetLayout;
 
-        HitActivityFragment hitActivityFragment = HitActivityFragment.newInstance(artistId);
+        HitActivityFragment hitActivityFragment = HitActivityFragment.newInstance(artistId, artistName);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         if (mTwoPane) {
             targetLayout = R.id.detail_container;
@@ -148,10 +148,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
 
     @Override
-    public void hitListener(MyTrack myTrack, String artistId) {
+    public void hitListener(MyTrack myTrack, String artistId, String artistName) {
         Intent intent = new Intent(this, PlayerActivity.class);
         intent.putExtra(PlayerActivity.PLAYER_ARTIST_ID, artistId);
-        //intent.putExtra(PlayerActivity.PLAYER_TRACK, myTrack);
+        intent.putExtra(PlayerActivity.PLAYER_ARTIST_NAME, artistName);
+        intent.putExtra(PlayerActivity.PLAYER_TRACK, myTrack);
         startActivity(intent);
     }
 }

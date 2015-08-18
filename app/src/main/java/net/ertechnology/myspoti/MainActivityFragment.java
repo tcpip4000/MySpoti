@@ -47,7 +47,7 @@ public class MainActivityFragment extends Fragment implements AsyncResponseArtis
     }
 
     public interface MainFragmentListener {
-        void onArtistClicked(String artistId);
+        void onArtistClicked(String artistId, String artistName);
     }
 
     public static MainActivityFragment newInstance(int choiceMode) {
@@ -89,7 +89,7 @@ public class MainActivityFragment extends Fragment implements AsyncResponseArtis
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     MyArtist item = mCustomAdapter.getItem(position);
                     mSelectedPosition = position;
-                    mCallback.onArtistClicked(item.getId());
+                    mCallback.onArtistClicked(item.getId(), item.getName());
                 }
             });
 

@@ -3,6 +3,7 @@ package net.ertechnology.myspoti;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -34,11 +35,25 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
     private static final String HIT_ARTIST_ID = "HIT_ARTIST_ID";
     private static final String LOG_TAG = HitActivityFragment.class.getSimpleName();
     private static final String HIT_ACTIVITY_ARRAY = "HIT_ACTIVITY_ARRAY";
+    private static final String HIT_ARTIST_NAME = "HIT_ARTIST_NAME";
     private HitAdapter mHitAdapter;
     private ArrayList<MyTrack> mTrackList;
     private HitActivityListener mCallback;
+    private String mArtistId;
+    private String mArtistName;
 
     public HitActivityFragment() {
+    }
+
+    public static HitActivityFragment newInstance(String artistId, String artistName) {
+        HitActivityFragment hitActivityFragment = new HitActivityFragment();
+
+        Bundle args = new Bundle();
+        args.putString(HIT_ARTIST_ID, artistId);
+        args.putString(HIT_ARTIST_NAME, artistName);
+        hitActivityFragment.setArguments(args);
+
+        return hitActivityFragment;
     }
 
     @Override
@@ -53,27 +68,24 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
 
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mArtistId = getArguments().getString(HIT_ARTIST_ID);
+        mArtistName = getArguments().getString(HIT_ARTIST_NAME);
+    }
+
     public interface HitActivityListener {
-        void hitListener(MyTrack myTrack, String artistId);
+        void hitListener(MyTrack myTrack, String artistId, String artistName);
     }
 
-    public static HitActivityFragment newInstance(String artistId) {
-        HitActivityFragment hitActivityFragment = new HitActivityFragment();
-
-        Bundle args = new Bundle();
-        args.putString(HIT_ARTIST_ID, artistId);
-        hitActivityFragment.setArguments(args);
-
-        return hitActivityFragment;
-    }
-
-    private String getArtistId() {
+   /* private String getArtistId() {
         if (getArguments() != null) {
             return getArguments().getString(HIT_ARTIST_ID);
         } else {
             return  null;
         }
-    }
+    }*/
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -94,12 +106,12 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
         }
 
         if (savedInstanceState == null) {
-            String artistId = getArtistId();
-            if (artistId != null) {
-                Log.d(LOG_TAG, "Received id:" + artistId);
+            //String artistId = getArtistId();
+            if (mArtistId != null) {
+                Log.d(LOG_TAG, "Received id:" + mArtistId);
                 GetTrackListTask getTrackListTask = new GetTrackListTask();
                 getTrackListTask.delegate = this;
-                getTrackListTask.execute(artistId);
+                getTrackListTask.execute(mArtistId);
             }
         } else {
             mTrackList = savedInstanceState.getParcelableArrayList(HIT_ACTIVITY_ARRAY);
@@ -113,7 +125,7 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MyTrack myTrack = mHitAdapter.getItem(position);
-                mCallback.hitListener(myTrack, getArtistId());
+                mCallback.hitListener(myTrack, mArtistId, mArtistName);
             }
         });
 
@@ -202,7 +214,7 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
         }
     }
 
-    class ViewHolder {
+    private class ViewHolder {
         final ListView listView;
 
         public ViewHolder(View view) {

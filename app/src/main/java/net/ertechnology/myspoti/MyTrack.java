@@ -39,6 +39,7 @@ public class MyTrack implements Parcelable {
     private MyTrack(Parcel in) {
         mName = in.readString();
         mAlbumName = in.readString();
+        mImages = new ArrayList<>();
         in.readList(mImages, null);
     }
 
