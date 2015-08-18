@@ -1,5 +1,6 @@
 package net.ertechnology.myspoti;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -34,8 +36,25 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
     private static final String HIT_ACTIVITY_ARRAY = "HIT_ACTIVITY_ARRAY";
     private HitAdapter mHitAdapter;
     private ArrayList<MyTrack> mTrackList;
+    private HitActivityListener mCallback;
 
     public HitActivityFragment() {
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mCallback = (HitActivityListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.getLocalClassName() +
+                    " activity does not implement HitActivityListener");
+        }
+
+    }
+
+    public interface HitActivityListener {
+        void hitListener(MyTrack myTrack);
     }
 
     public static HitActivityFragment newInstance(String artistId) {
@@ -60,6 +79,14 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_hit, container, false);
+        ViewHolder viewHolder;
+
+        if (view.getTag() == null) {
+            viewHolder = new ViewHolder(view);
+            view.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) view.getTag();
+        }
 
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
@@ -77,11 +104,18 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
         } else {
             mTrackList = savedInstanceState.getParcelableArrayList(HIT_ACTIVITY_ARRAY);
             if (mTrackList != null) {
-                ListView listView = (ListView) view.findViewById(R.id.hit_listview);
                 mHitAdapter = new HitAdapter(getActivity(), mTrackList);
-                listView.setAdapter(mHitAdapter);
+                viewHolder.listView.setAdapter(mHitAdapter);
             }
         }
+
+        viewHolder.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                MyTrack myTrack = mHitAdapter.getItem(position);
+                mCallback.hitListener(myTrack);
+            }
+        });
 
         return view;
     }
@@ -119,9 +153,9 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
             try {
                 mTrackList = tracks;
                 if (getView() != null) {
-                    ListView listView = (ListView) getView().findViewById(R.id.hit_listview);
+                    ViewHolder viewHolder = (ViewHolder) getView().getTag();
                     mHitAdapter = new HitAdapter(getActivity(), mTrackList);
-                    listView.setAdapter(mHitAdapter);
+                    viewHolder.listView.setAdapter(mHitAdapter);
                     if (tracks.size() == 0) {
                         Toast.makeText(getActivity(), R.string.track_not_found, Toast.LENGTH_SHORT).show();
                     }
@@ -165,6 +199,14 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
         @Override
         protected void onPostExecute(ArrayList<MyTrack> myTracks) {
             delegate.processFinish(myTracks);
+        }
+    }
+
+    class ViewHolder {
+        final ListView listView;
+
+        public ViewHolder(View view) {
+            listView = (ListView) view.findViewById(R.id.hit_listview);
         }
     }
 }

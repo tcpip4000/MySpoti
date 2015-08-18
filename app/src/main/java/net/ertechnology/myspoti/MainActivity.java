@@ -18,7 +18,7 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 
 
-public class MainActivity extends AppCompatActivity implements MainActivityFragment.MainFragmentListener {
+public class MainActivity extends AppCompatActivity implements MainActivityFragment.MainFragmentListener, HitActivityFragment.HitActivityListener {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_CODE = 1337;
@@ -147,4 +147,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     }
 
 
+    @Override
+    public void hitListener(MyTrack myTrack) {
+        Intent intent = new Intent(this, PlayerActivity.class);
+        startActivity(intent);
+    }
 }

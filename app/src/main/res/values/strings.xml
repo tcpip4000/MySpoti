@@ -7,4 +7,6 @@
     <string name="list_item_default_description">Artist Image</string>
     <string name="title_activity_hit">Top 10 Tracks</string>
     <string name="list_item_default_track">Track item</string>
+    <string name="title_activity_player">PlayerActivity</string>
+    <string name="hello_world">Hello world!</string>
 </resources>
