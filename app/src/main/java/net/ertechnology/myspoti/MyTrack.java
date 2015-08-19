@@ -14,6 +14,10 @@ import kaaes.spotify.webapi.android.models.Track;
  */
 public class MyTrack implements Parcelable {
 
+    public String getId() {
+        return mId;
+    }
+
     public String getName() {
         return mName;
     }
@@ -26,19 +30,29 @@ public class MyTrack implements Parcelable {
         return mImages;
     }
 
+    public String getPreviewUrl() {
+        return mPreviewUrl;
+    }
+
+    private final String mId;
     private final String mName;
     private final String mAlbumName;
     private List<String> mImages;
+    private final String mPreviewUrl;
 
-    public MyTrack(String name, String albumName, List<String> images) {
+    public MyTrack(String id, String name, String albumName, List<String> images, String previewUrl) {
+        mId = id;
         mName = name;
         mAlbumName = albumName;
+        mPreviewUrl = previewUrl;
         mImages = images;
     }
 
     private MyTrack(Parcel in) {
+        mId = in.readString();
         mName = in.readString();
         mAlbumName = in.readString();
+        mPreviewUrl = in.readString();
         mImages = new ArrayList<>();
         in.readList(mImages, null);
     }
@@ -64,8 +78,10 @@ public class MyTrack implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mId);
         dest.writeString(mName);
         dest.writeString(mAlbumName);
+        dest.writeString(mPreviewUrl);
         dest.writeList(mImages);
     }
 
@@ -106,7 +122,7 @@ public class MyTrack implements Parcelable {
             for (Image image: item.album.images) {
                 imageUrls.add(image.url);
             }
-            myTracks.add(new MyTrack(item.name, item.album.name, imageUrls));
+            myTracks.add(new MyTrack(item.id, item.name, item.album.name, imageUrls, item.preview_url));
         }
         return myTracks;
     }

@@ -1,8 +1,12 @@
 package net.ertechnology.myspoti;
 
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +17,9 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -20,8 +27,11 @@ public class PlayerActivityFragment extends Fragment {
 
     private static final String LOG_TAG = PlayerActivityFragment.class.getSimpleName();
     private String mArtistId;
-    private MyTrack mTrack;
+    private ArrayList<MyTrack> mTrackList;
     private String mArtistName;
+    private String mTrackId;
+    private MyTrack mTrack;
+    private static MediaPlayer mMediaPlayer;
 
     public PlayerActivityFragment() {
     }
@@ -31,14 +41,27 @@ public class PlayerActivityFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mArtistId = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_ARTIST_ID);
         mArtistName = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_ARTIST_NAME);
-        mTrack = getActivity().getIntent().getParcelableExtra(PlayerActivity.PLAYER_TRACK);
+        mTrackList = getActivity().getIntent().getParcelableArrayListExtra(PlayerActivity.PLAYER_TRACKS);
+        mTrackId = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_TRACK_ID);
+        mTrack = findTrack(mTrackId, mTrackList);
+        mMediaPlayer = new MediaPlayer();
     }
+
+    private MyTrack findTrack(String trackId, ArrayList<MyTrack> trackList) {
+        for (int i = 0; i < trackList.size(); i++) {
+            if (trackId.equals(trackList.get(i).getId())) {
+                return trackList.get(i);
+            }
+        }
+        return null;
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         //Log.d(LOG_TAG, mArtistId);
-        //Log.d(LOG_TAG, mTrack.toString());
+        //Log.d(LOG_TAG, mTrackList.toString());
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         ViewHolder viewHolder;
 
@@ -56,7 +79,45 @@ public class PlayerActivityFragment extends Fragment {
                 .load(mTrack.getImages().get(0))
                 .into(viewHolder.playerImage);
 
+        PlayerTask playerTask = new PlayerTask();
+        playerTask.execute(mTrack.getPreviewUrl());
+
         return view;
+    }
+
+    private static class PlayerTask extends AsyncTask<String, Void, Void> {
+
+        //AsyncResponse delegate;
+
+        @Override
+        protected Void doInBackground(String... params) {
+            String url = params[0];
+
+            try {
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mMediaPlayer.setDataSource(url);
+                mMediaPlayer.prepare();
+                mMediaPlayer.start();
+            } catch (IllegalArgumentException e) {
+                Log.d(LOG_TAG, "Error", e);
+            } catch (IOException e) {
+                Log.d(LOG_TAG, "Error", e);
+            }
+
+            return  null;
+        }
+
+/*        @Override
+        protected void onPostExecute(ArrayList<MyTrack> myTracks) {
+            delegate.processFinish(myTracks);
+        }*/
+    }
+
+    @Override
+    public void onDestroy() {
+        mMediaPlayer.release();
+        mMediaPlayer = null;
+        super.onDestroy();
     }
 
     private static class ViewHolder {

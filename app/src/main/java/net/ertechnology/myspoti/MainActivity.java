@@ -14,6 +14,8 @@ import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
+import java.util.ArrayList;
+
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 
@@ -148,11 +150,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
 
     @Override
-    public void hitListener(MyTrack myTrack, String artistId, String artistName) {
+    public void hitListener(ArrayList<MyTrack> myTrackList, String trackId, String artistId, String artistName) {
         Intent intent = new Intent(this, PlayerActivity.class);
         intent.putExtra(PlayerActivity.PLAYER_ARTIST_ID, artistId);
         intent.putExtra(PlayerActivity.PLAYER_ARTIST_NAME, artistName);
-        intent.putExtra(PlayerActivity.PLAYER_TRACK, myTrack);
+        intent.putParcelableArrayListExtra(PlayerActivity.PLAYER_TRACKS, myTrackList);
+        intent.putExtra(PlayerActivity.PLAYER_TRACK_ID, trackId);
         startActivity(intent);
     }
 }
