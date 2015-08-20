@@ -5,6 +5,7 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -34,14 +35,14 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     private MyTrack mTrack;
     private static MediaPlayer sMediaPlayer;
     private static boolean sIsPrepared;
-    private Handler mHandler; /* = new Handler() {
+    private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             int pos;
             switch (msg.what) {
-                *//*case FADE_OUT:
+                /*case FADE_OUT:
                     hide();
-                    break;*//*
+                    break;*/
                 case SHOW_PROGRESS:
                     pos = setProgress();
                     if (sMediaPlayer.isPlaying()) {
@@ -51,7 +52,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
                     break;
             }
         }
-    };*/
+    };
     private static final int FADE_OUT = 1;
     private static final int SHOW_PROGRESS = 2;
     private SeekBar mPlayerProgressBar;
@@ -69,7 +70,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         mTrack = findTrack(mTrackId, mTrackList);
         sMediaPlayer = new MediaPlayer();
         sIsPrepared = false;
-        mHandler = new Handler();
+        //mHandler = new Handler();
     }
 
     private int setProgress() {
@@ -169,7 +170,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
             final ViewHolder viewHolder = (ViewHolder) getView().getTag();
             viewHolder.playerProgressBar.setMax(sMediaPlayer.getDuration());
 
-           /* getActivity().runOnUiThread(new Runnable() {
+           getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     if (sMediaPlayer != null) {
@@ -179,8 +180,8 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
                     mHandler.postDelayed(this, 1000);
                 }
             });
+            mHandler.sendEmptyMessage(SHOW_PROGRESS);
 
-            mHandler.sendEmptyMessage(SHOW_PROGRESS);*/
         } else {
             Log.e(LOG_TAG, "Error setting progress bar");
         }
