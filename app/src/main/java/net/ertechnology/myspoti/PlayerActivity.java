@@ -15,6 +15,7 @@ public class PlayerActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_player);
+
     }
 
 }

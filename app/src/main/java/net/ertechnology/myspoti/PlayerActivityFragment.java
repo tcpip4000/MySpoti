@@ -4,6 +4,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -12,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class PlayerActivityFragment extends Fragment {
+public class PlayerActivityFragment extends Fragment implements AsyncResponseMediaPlayer {
 
     private static final String LOG_TAG = PlayerActivityFragment.class.getSimpleName();
     private String mArtistId;
@@ -31,7 +32,29 @@ public class PlayerActivityFragment extends Fragment {
     private String mArtistName;
     private String mTrackId;
     private MyTrack mTrack;
-    private static MediaPlayer mMediaPlayer;
+    private static MediaPlayer sMediaPlayer;
+    private static boolean sIsPrepared;
+    private Handler mHandler; /* = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            int pos;
+            switch (msg.what) {
+                *//*case FADE_OUT:
+                    hide();
+                    break;*//*
+                case SHOW_PROGRESS:
+                    pos = setProgress();
+                    if (sMediaPlayer.isPlaying()) {
+                        msg = obtainMessage(SHOW_PROGRESS);
+                        sendMessageDelayed(msg, 1000 - (pos % 1000));
+                    }
+                    break;
+            }
+        }
+    };*/
+    private static final int FADE_OUT = 1;
+    private static final int SHOW_PROGRESS = 2;
+    private SeekBar mPlayerProgressBar;
 
     public PlayerActivityFragment() {
     }
@@ -44,7 +67,32 @@ public class PlayerActivityFragment extends Fragment {
         mTrackList = getActivity().getIntent().getParcelableArrayListExtra(PlayerActivity.PLAYER_TRACKS);
         mTrackId = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_TRACK_ID);
         mTrack = findTrack(mTrackId, mTrackList);
-        mMediaPlayer = new MediaPlayer();
+        sMediaPlayer = new MediaPlayer();
+        sIsPrepared = false;
+        mHandler = new Handler();
+    }
+
+    private int setProgress() {
+        if (sMediaPlayer == null ) {
+            return 0;
+        }
+
+        int position = sMediaPlayer.getCurrentPosition();
+        int duration = sMediaPlayer.getDuration();
+        if (mPlayerProgressBar != null) {
+            if (duration > 0) {
+                // use long to avoid overflow
+                long pos = 1000L * position / duration;
+                mPlayerProgressBar.setProgress((int) pos);
+            }
+        }
+
+/*        if (mEndTime != null)
+            mEndTime.setText(stringForTime(duration));
+        if (mCurrentTime != null)
+            mCurrentTime.setText(stringForTime(position));*/
+
+        return position;
     }
 
     private MyTrack findTrack(String trackId, ArrayList<MyTrack> trackList) {
@@ -63,7 +111,7 @@ public class PlayerActivityFragment extends Fragment {
         //Log.d(LOG_TAG, mArtistId);
         //Log.d(LOG_TAG, mTrackList.toString());
         View view = inflater.inflate(R.layout.fragment_player, container, false);
-        ViewHolder viewHolder;
+        final ViewHolder viewHolder;
 
         if (view.getTag() == null) {
             viewHolder = new ViewHolder(view);
@@ -79,44 +127,101 @@ public class PlayerActivityFragment extends Fragment {
                 .load(mTrack.getImages().get(0))
                 .into(viewHolder.playerImage);
 
-        PlayerTask playerTask = new PlayerTask();
-        playerTask.execute(mTrack.getPreviewUrl());
+        mPlayerProgressBar = viewHolder.playerProgressBar;
+
+        // Listeners
+
+        viewHolder.playerPlayStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (sMediaPlayer.isPlaying()) {
+                    sMediaPlayer.pause();
+                    viewHolder.playerPlayStop.setImageResource(android.R.drawable.ic_media_play);
+                } else {
+                    if (!sIsPrepared) {
+                        PlayerTask playerTask = new PlayerTask();
+                        playerTask.delegate = (AsyncResponseMediaPlayer) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment);
+                        playerTask.execute(mTrack.getPreviewUrl());
+                    } else {
+                        sMediaPlayer.start();
+                    }
+
+                    viewHolder.playerPlayStop.setImageResource(android.R.drawable.ic_media_pause);
+                    sIsPrepared = true;
+                }
+            }
+        });
+
+        sMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                viewHolder.playerPlayStop.setImageResource(android.R.drawable.ic_media_play);
+            }
+        });
 
         return view;
     }
 
-    private static class PlayerTask extends AsyncTask<String, Void, Void> {
+    @Override
+    public void processFinish(Integer msg) {
+        if (getView() != null && getView().getTag() != null && msg == 0) {
+            final ViewHolder viewHolder = (ViewHolder) getView().getTag();
+            viewHolder.playerProgressBar.setMax(sMediaPlayer.getDuration());
 
-        //AsyncResponse delegate;
+           /* getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (sMediaPlayer != null) {
+                        int currentPosition = sMediaPlayer.getCurrentPosition() / 1000;
+                        viewHolder.playerProgressBar.setProgress(currentPosition);
+                    }
+                    mHandler.postDelayed(this, 1000);
+                }
+            });
+
+            mHandler.sendEmptyMessage(SHOW_PROGRESS);*/
+        } else {
+            Log.e(LOG_TAG, "Error setting progress bar");
+        }
+    }
+
+    private static class PlayerTask extends AsyncTask<String, Void, Integer> {
+
+        AsyncResponseMediaPlayer delegate;
 
         @Override
-        protected Void doInBackground(String... params) {
+        protected Integer doInBackground(String... params) {
             String url = params[0];
+            int status = 0;
 
             try {
-                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mMediaPlayer.setDataSource(url);
-                mMediaPlayer.prepare();
-                mMediaPlayer.start();
+                sMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                sMediaPlayer.setDataSource(url);
+                sMediaPlayer.prepare();
+                sMediaPlayer.start();
+                sIsPrepared = true;
             } catch (IllegalArgumentException e) {
                 Log.d(LOG_TAG, "Error", e);
+                status = 1;
             } catch (IOException e) {
                 Log.d(LOG_TAG, "Error", e);
+                status = 2;
             }
 
-            return  null;
+            return status;
         }
 
-/*        @Override
-        protected void onPostExecute(ArrayList<MyTrack> myTracks) {
-            delegate.processFinish(myTracks);
-        }*/
+        @Override
+        protected void onPostExecute(Integer msg) {
+            delegate.processFinish(msg);
+        }
     }
 
     @Override
     public void onDestroy() {
-        mMediaPlayer.release();
-        mMediaPlayer = null;
+        sMediaPlayer.release();
+        sMediaPlayer = null;
         super.onDestroy();
     }
 
@@ -124,7 +229,7 @@ public class PlayerActivityFragment extends Fragment {
         final TextView playerArtist;
         final TextView playerSong;
         final ImageView playerImage;
-        final ProgressBar playerProgressBar;
+        final SeekBar playerProgressBar;
         final ImageButton playerBack;
         final ImageButton playerPlayStop;
         final ImageButton playerNext;
@@ -133,7 +238,7 @@ public class PlayerActivityFragment extends Fragment {
             playerArtist = (TextView) view.findViewById(R.id.player_artist);
             playerSong = (TextView) view.findViewById(R.id.player_song);
             playerImage  = (ImageView) view.findViewById(R.id.player_image);
-            playerProgressBar  = (ProgressBar) view.findViewById(R.id.player_progressBar);
+            playerProgressBar  = (SeekBar) view.findViewById(R.id.player_progressBar);
             playerBack  = (ImageButton) view.findViewById(R.id.player_back);
             playerPlayStop  = (ImageButton) view.findViewById(R.id.player_play_stop);
             playerNext = (ImageButton) view.findViewById(R.id.player_next);
