@@ -5,7 +5,6 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -35,27 +34,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     private MyTrack mTrack;
     private static MediaPlayer sMediaPlayer;
     private static boolean sIsPrepared;
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            int pos;
-            switch (msg.what) {
-                /*case FADE_OUT:
-                    hide();
-                    break;*/
-                case SHOW_PROGRESS:
-                    pos = setProgress();
-                    if (sMediaPlayer.isPlaying()) {
-                        msg = obtainMessage(SHOW_PROGRESS);
-                        sendMessageDelayed(msg, 1000 - (pos % 1000));
-                    }
-                    break;
-            }
-        }
-    };
-    private static final int FADE_OUT = 1;
-    private static final int SHOW_PROGRESS = 2;
-    private SeekBar mPlayerProgressBar;
+    private Handler mHandler;
 
     public PlayerActivityFragment() {
     }
@@ -70,30 +49,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         mTrack = findTrack(mTrackId, mTrackList);
         sMediaPlayer = new MediaPlayer();
         sIsPrepared = false;
-        //mHandler = new Handler();
-    }
-
-    private int setProgress() {
-        if (sMediaPlayer == null ) {
-            return 0;
-        }
-
-        int position = sMediaPlayer.getCurrentPosition();
-        int duration = sMediaPlayer.getDuration();
-        if (mPlayerProgressBar != null) {
-            if (duration > 0) {
-                // use long to avoid overflow
-                long pos = 1000L * position / duration;
-                mPlayerProgressBar.setProgress((int) pos);
-            }
-        }
-
-/*        if (mEndTime != null)
-            mEndTime.setText(stringForTime(duration));
-        if (mCurrentTime != null)
-            mCurrentTime.setText(stringForTime(position));*/
-
-        return position;
+        mHandler = new Handler();
     }
 
     private MyTrack findTrack(String trackId, ArrayList<MyTrack> trackList) {
@@ -127,10 +83,6 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         Picasso.with(getActivity())
                 .load(mTrack.getImages().get(0))
                 .into(viewHolder.playerImage);
-
-        mPlayerProgressBar = viewHolder.playerProgressBar;
-
-        // Listeners
 
         viewHolder.playerPlayStop.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,9 +120,9 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     public void processFinish(Integer msg) {
         if (getView() != null && getView().getTag() != null && msg == 0) {
             final ViewHolder viewHolder = (ViewHolder) getView().getTag();
-            viewHolder.playerProgressBar.setMax(sMediaPlayer.getDuration());
+            viewHolder.playerProgressBar.setMax(sMediaPlayer.getDuration() / 1000);
 
-           getActivity().runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     if (sMediaPlayer != null) {
@@ -180,8 +132,6 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
                     mHandler.postDelayed(this, 1000);
                 }
             });
-            mHandler.sendEmptyMessage(SHOW_PROGRESS);
-
         } else {
             Log.e(LOG_TAG, "Error setting progress bar");
         }
