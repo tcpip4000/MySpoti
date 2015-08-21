@@ -15,6 +15,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -32,6 +33,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     private String mArtistName;
     private String mTrackId;
     private MyTrack mTrack;
+    private int mIndex;
     private static MediaPlayer sMediaPlayer;
     private static boolean sIsPrepared;
     private Handler mHandler;
@@ -46,19 +48,21 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         mArtistName = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_ARTIST_NAME);
         mTrackList = getActivity().getIntent().getParcelableArrayListExtra(PlayerActivity.PLAYER_TRACKS);
         mTrackId = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_TRACK_ID);
-        mTrack = findTrack(mTrackId, mTrackList);
+        PlayerResponse pr = findTrack(mTrackId, mTrackList);
+        mTrack = pr.mTrack;
+        mIndex = pr.mIndex;
         sMediaPlayer = new MediaPlayer();
         sIsPrepared = false;
         mHandler = new Handler();
     }
 
-    private MyTrack findTrack(String trackId, ArrayList<MyTrack> trackList) {
+    private PlayerResponse findTrack(String trackId, ArrayList<MyTrack> trackList) {
         for (int i = 0; i < trackList.size(); i++) {
             if (trackId.equals(trackList.get(i).getId())) {
-                return trackList.get(i);
+                return new PlayerResponse(trackList.get(i), i);
             }
         }
-        return null;
+        throw new RuntimeException("Track id not found in list");
     }
 
 
@@ -77,13 +81,11 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
             viewHolder = (ViewHolder) view.getTag();
         }
 
+        // Update View
         viewHolder.playerArtist.setText(mArtistName);
-        viewHolder.playerSong.setText(mTrack.getName());
+        updateView(viewHolder);
 
-        Picasso.with(getActivity())
-                .load(mTrack.getImages().get(0))
-                .into(viewHolder.playerImage);
-
+        // Listeners
         viewHolder.playerPlayStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -93,15 +95,13 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
                     viewHolder.playerPlayStop.setImageResource(android.R.drawable.ic_media_play);
                 } else {
                     if (!sIsPrepared) {
-                        PlayerTask playerTask = new PlayerTask();
-                        playerTask.delegate = (AsyncResponseMediaPlayer) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment);
-                        playerTask.execute(mTrack.getPreviewUrl());
+                        asyncPlay();
                     } else {
                         sMediaPlayer.start();
                     }
 
                     viewHolder.playerPlayStop.setImageResource(android.R.drawable.ic_media_pause);
-                    sIsPrepared = true;
+
                 }
             }
         });
@@ -113,7 +113,55 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
             }
         });
 
+        viewHolder.playerNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int indexOld = mIndex;
+                mIndex = getNextIndex();
+                if (mIndex != indexOld) {
+                    if (sMediaPlayer.isPlaying()) {
+                        sMediaPlayer.stop();
+                        sMediaPlayer.reset();
+                    }
+                    mTrack = mTrackList.get(mIndex);
+                    updateView((ViewHolder) getView().getTag());
+                    asyncPlay();
+                }
+            }
+        });
+
         return view;
+    }
+
+    private void updateView(ViewHolder viewHolder) {
+        viewHolder.playerSong.setText(mTrack.getName());
+        Picasso.with(getActivity())
+                .load(mTrack.getImages().get(0))
+                .into(viewHolder.playerImage);
+    }
+
+    private int getNextIndex() {
+        int i = mIndex + 1;
+        if (i >= mTrackList.size()) {
+            i = mIndex;
+            Toast.makeText(getActivity(), "No more songs", Toast.LENGTH_SHORT).show();
+        }
+        return i;
+    }
+
+    private int getPrevIndex() {
+        int i = mIndex - 1;
+        if (i < 0 ) {
+            i = mIndex;
+            Toast.makeText(getActivity(), "No more songs", Toast.LENGTH_SHORT).show();
+        }
+        return i;
+    }
+
+    public void asyncPlay() {
+        PlayerTask playerTask = new PlayerTask();
+        playerTask.delegate = (AsyncResponseMediaPlayer) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment);
+        playerTask.execute(mTrack.getPreviewUrl());
     }
 
     @Override
@@ -195,4 +243,5 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
             playerNext = (ImageButton) view.findViewById(R.id.player_next);
         }
     }
+
 }
