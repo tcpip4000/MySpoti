@@ -37,6 +37,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     private static MediaPlayer sMediaPlayer;
     private static boolean sIsPrepared;
     private Handler mHandler;
+    private static boolean mPreviousPlaying;
 
     public PlayerActivityFragment() {
     }
@@ -54,6 +55,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         sMediaPlayer = new MediaPlayer();
         sIsPrepared = false;
         mHandler = new Handler();
+        mPreviousPlaying = false;
     }
 
     private PlayerResponse findTrack(String trackId, ArrayList<MyTrack> trackList) {
@@ -85,23 +87,24 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         viewHolder.playerArtist.setText(mArtistName);
         updateView(viewHolder);
 
+        // Start playing for first time
+        //asyncPlay(false);
+
         // Listeners
-        viewHolder.playerPlayStop.setOnClickListener(new View.OnClickListener() {
+        viewHolder.playerPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 if (sMediaPlayer.isPlaying()) {
                     sMediaPlayer.pause();
-                    viewHolder.playerPlayStop.setImageResource(android.R.drawable.ic_media_play);
+                    viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
                 } else {
                     if (!sIsPrepared) {
-                        asyncPlay();
+                        asyncPlay(false);
                     } else {
                         sMediaPlayer.start();
                     }
-
-                    viewHolder.playerPlayStop.setImageResource(android.R.drawable.ic_media_pause);
-
+                    viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_pause);
                 }
             }
         });
@@ -109,7 +112,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         sMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                viewHolder.playerPlayStop.setImageResource(android.R.drawable.ic_media_play);
+                viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
             }
         });
 
@@ -120,12 +123,37 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
                 mIndex = getNextIndex();
                 if (mIndex != indexOld) {
                     if (sMediaPlayer.isPlaying()) {
+                        mPreviousPlaying = true;
                         sMediaPlayer.stop();
-                        sMediaPlayer.reset();
+                    } else {
+                        mPreviousPlaying = false;
                     }
+                    sMediaPlayer.reset();
+                    sIsPrepared = false;
                     mTrack = mTrackList.get(mIndex);
                     updateView((ViewHolder) getView().getTag());
-                    asyncPlay();
+                    asyncPlay(true);
+                }
+            }
+        });
+
+        viewHolder.playerBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int indexOld = mIndex;
+                mIndex = getPrevIndex();
+                if (mIndex != indexOld) {
+                    if (sMediaPlayer.isPlaying()) {
+                        mPreviousPlaying = true;
+                        sMediaPlayer.stop();
+                    } else {
+                        mPreviousPlaying = false;
+                    }
+                    sMediaPlayer.reset();
+                    sIsPrepared = false;
+                    mTrack = mTrackList.get(mIndex);
+                    updateView((ViewHolder) getView().getTag());
+                    asyncPlay(true);
                 }
             }
         });
@@ -138,6 +166,11 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         Picasso.with(getActivity())
                 .load(mTrack.getImages().get(0))
                 .into(viewHolder.playerImage);
+        if (mPreviousPlaying) {
+            viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_pause);
+        } else {
+            viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
+        }
     }
 
     private int getNextIndex() {
@@ -158,10 +191,10 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         return i;
     }
 
-    public void asyncPlay() {
+    public void asyncPlay(boolean changedSong) {
         PlayerTask playerTask = new PlayerTask();
         playerTask.delegate = (AsyncResponseMediaPlayer) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment);
-        playerTask.execute(mTrack.getPreviewUrl());
+        playerTask.execute(mTrack.getPreviewUrl(), changedSong);
     }
 
     @Override
@@ -185,20 +218,28 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         }
     }
 
-    private static class PlayerTask extends AsyncTask<String, Void, Integer> {
+    private static class PlayerTask extends AsyncTask<Object, Void, Integer> {
 
         AsyncResponseMediaPlayer delegate;
 
         @Override
-        protected Integer doInBackground(String... params) {
-            String url = params[0];
+        protected Integer doInBackground(Object... params) {
+            String url = (String) params[0];
+            boolean changedSong = (boolean) params[1];
             int status = 0;
+            Log.d(LOG_TAG, "Started asyn...");
 
             try {
                 sMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 sMediaPlayer.setDataSource(url);
                 sMediaPlayer.prepare();
-                sMediaPlayer.start();
+                if (!changedSong) {
+                    sMediaPlayer.start();
+                } else {
+                    if (mPreviousPlaying) {
+                        sMediaPlayer.start();
+                    }
+                }
                 sIsPrepared = true;
             } catch (IllegalArgumentException e) {
                 Log.d(LOG_TAG, "Error", e);
@@ -230,7 +271,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         final ImageView playerImage;
         final SeekBar playerProgressBar;
         final ImageButton playerBack;
-        final ImageButton playerPlayStop;
+        final ImageButton playerPlayPause;
         final ImageButton playerNext;
 
         public ViewHolder(View view) {
@@ -239,7 +280,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
             playerImage  = (ImageView) view.findViewById(R.id.player_image);
             playerProgressBar  = (SeekBar) view.findViewById(R.id.player_progressBar);
             playerBack  = (ImageButton) view.findViewById(R.id.player_back);
-            playerPlayStop  = (ImageButton) view.findViewById(R.id.player_play_stop);
+            playerPlayPause = (ImageButton) view.findViewById(R.id.player_play_stop);
             playerNext = (ImageButton) view.findViewById(R.id.player_next);
         }
     }
