@@ -147,7 +147,7 @@ class MySpotiAdapter extends ArrayAdapter<MyArtist> implements Filterable {
          */
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-            mObjects = (List<MyArtist>) results.values;
+            mObjects = (ArrayList<MyArtist>) results.values;
             if (results.count > 0) {
                 notifyDataSetChanged();
             } else {

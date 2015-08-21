@@ -126,7 +126,9 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
                     sMediaPlayer.reset();
                     sIsPrepared = false;
                     mTrack = mTrackList.get(mIndex);
-                    updateView((ViewHolder) getView().getTag());
+                    if (getView() != null && getView().getTag() != null) {
+                        updateView((ViewHolder) getView().getTag());
+                    }
                     asyncPlay(true);
                 }
             }
@@ -147,7 +149,9 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
                     sMediaPlayer.reset();
                     sIsPrepared = false;
                     mTrack = mTrackList.get(mIndex);
-                    updateView((ViewHolder) getView().getTag());
+                    if (getView() != null && getView().getTag() != null) {
+                        updateView((ViewHolder) getView().getTag());
+                    }
                     asyncPlay(true);
                 }
             }
@@ -186,14 +190,14 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         return i;
     }
 
-    public void asyncPlay(boolean changedSong) {
+    private void asyncPlay(boolean changedSong) {
         PlayerTask playerTask = new PlayerTask();
         playerTask.delegate = (AsyncResponseMediaPlayer) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment);
         enableButtons(false);
         playerTask.execute(mTrack.getPreviewUrl(), changedSong);
     }
 
-    public void enableButtons(boolean enable) {
+    private void enableButtons(boolean enable) {
         ViewHolder viewHolder;
         if (getView() != null && (viewHolder = (ViewHolder) getView().getTag()) != null) {
             viewHolder.playerBack.setEnabled(enable);
@@ -234,7 +238,6 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
             String url = (String) params[0];
             boolean changedSong = (boolean) params[1];
             int status = 0;
-            Log.d(LOG_TAG, "Started asyn...");
 
             try {
                 sMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);

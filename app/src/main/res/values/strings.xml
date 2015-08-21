@@ -8,5 +8,8 @@
     <string name="title_activity_hit">Top 10 Tracks</string>
     <string name="list_item_default_track">Track item</string>
     <string name="title_activity_player">Spoti Streamer</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="song_image">Song Image</string>
+    <string name="back_button">Back Button</string>
+    <string name="play_pause_button">Play Pause Button</string>
+    <string name="next_button">Next Button</string>
 </resources>

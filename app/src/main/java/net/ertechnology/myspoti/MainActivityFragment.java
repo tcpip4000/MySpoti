@@ -40,7 +40,6 @@ public class MainActivityFragment extends Fragment implements AsyncResponseArtis
 
     private MainFragmentListener mCallback;
     private int mSelectedPosition;
-    private ListView mListView;
     private String mArtistSearch;
 
     public MainActivityFragment() {
@@ -66,9 +65,11 @@ public class MainActivityFragment extends Fragment implements AsyncResponseArtis
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
+        ListView listView;
+
         try {
-            mListView = (ListView) view.findViewById(R.id.main_listview);
-            mListView.setChoiceMode(getChoiceMode());
+            listView = (ListView) view.findViewById(R.id.main_listview);
+            listView.setChoiceMode(getChoiceMode());
 
             if (savedInstanceState == null) {
                 mArtistList = new ArrayList<>();
@@ -82,9 +83,9 @@ public class MainActivityFragment extends Fragment implements AsyncResponseArtis
             }
 
             mCustomAdapter = new MySpotiAdapter(getActivity(), mArtistList);
-            mListView.setAdapter(mCustomAdapter);
+            listView.setAdapter(mCustomAdapter);
 
-            mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     MyArtist item = mCustomAdapter.getItem(position);
@@ -94,8 +95,8 @@ public class MainActivityFragment extends Fragment implements AsyncResponseArtis
             });
 
             if (mSelectedPosition != ListView.INVALID_POSITION) {
-                mListView.setSelection(mSelectedPosition);
-                mListView.setItemChecked(mSelectedPosition, true);
+                listView.setSelection(mSelectedPosition);
+                listView.setItemChecked(mSelectedPosition, true);
             }
 
 

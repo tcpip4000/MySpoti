@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     private String mToken; // TODO: use app session
     private boolean mTwoPane;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -150,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
 
     @Override
-    public void hitListener(ArrayList<MyTrack> myTrackList, String trackId, String artistId, String artistName) {
+    public void hitListener(ArrayList<MyTrack> myTrackList, String trackId, String artistName) {
         Intent intent = new Intent(this, PlayerActivity.class);
         intent.putExtra(PlayerActivity.PLAYER_ARTIST_NAME, artistName);
         intent.putParcelableArrayListExtra(PlayerActivity.PLAYER_TRACKS, myTrackList);
