@@ -28,10 +28,8 @@ import java.util.ArrayList;
 public class PlayerActivityFragment extends Fragment implements AsyncResponseMediaPlayer {
 
     private static final String LOG_TAG = PlayerActivityFragment.class.getSimpleName();
-    private String mArtistId;
     private ArrayList<MyTrack> mTrackList;
     private String mArtistName;
-    private String mTrackId;
     private MyTrack mTrack;
     private int mIndex;
     private static MediaPlayer sMediaPlayer;
@@ -45,11 +43,10 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mArtistId = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_ARTIST_ID);
         mArtistName = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_ARTIST_NAME);
         mTrackList = getActivity().getIntent().getParcelableArrayListExtra(PlayerActivity.PLAYER_TRACKS);
-        mTrackId = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_TRACK_ID);
-        PlayerResponse pr = findTrack(mTrackId, mTrackList);
+        String trackId = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_TRACK_ID);
+        PlayerResponse pr = findTrack(trackId, mTrackList);
         mTrack = pr.mTrack;
         mIndex = pr.mIndex;
         sMediaPlayer = new MediaPlayer();
@@ -71,8 +68,6 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        //Log.d(LOG_TAG, mArtistId);
-        //Log.d(LOG_TAG, mTrackList.toString());
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         final ViewHolder viewHolder;
 
@@ -199,16 +194,19 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     }
 
     public void enableButtons(boolean enable) {
-        ViewHolder viewHolder = (ViewHolder) getView().getTag();
-        viewHolder.playerBack.setEnabled(enable);
-        viewHolder.playerPlayPause.setEnabled(enable);
-        viewHolder.playerNext.setEnabled(enable);
+        ViewHolder viewHolder;
+        if (getView() != null && (viewHolder = (ViewHolder) getView().getTag()) != null) {
+            viewHolder.playerBack.setEnabled(enable);
+            viewHolder.playerPlayPause.setEnabled(enable);
+            viewHolder.playerNext.setEnabled(enable);
+        }
     }
 
     @Override
     public void processFinish(Integer msg) {
-        if (getView() != null && getView().getTag() != null && msg == 0) {
-            final ViewHolder viewHolder = (ViewHolder) getView().getTag();
+        final ViewHolder viewHolder;
+        if (getView() != null && (viewHolder = (ViewHolder) getView().getTag()) != null && msg == 0) {
+
             viewHolder.playerProgressBar.setMax(sMediaPlayer.getDuration() / 1000);
 
             getActivity().runOnUiThread(new Runnable() {

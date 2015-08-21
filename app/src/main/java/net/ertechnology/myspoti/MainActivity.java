@@ -152,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     @Override
     public void hitListener(ArrayList<MyTrack> myTrackList, String trackId, String artistId, String artistName) {
         Intent intent = new Intent(this, PlayerActivity.class);
-        intent.putExtra(PlayerActivity.PLAYER_ARTIST_ID, artistId);
         intent.putExtra(PlayerActivity.PLAYER_ARTIST_NAME, artistName);
         intent.putParcelableArrayListExtra(PlayerActivity.PLAYER_TRACKS, myTrackList);
         intent.putExtra(PlayerActivity.PLAYER_TRACK_ID, trackId);
