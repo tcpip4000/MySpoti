@@ -194,7 +194,15 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     public void asyncPlay(boolean changedSong) {
         PlayerTask playerTask = new PlayerTask();
         playerTask.delegate = (AsyncResponseMediaPlayer) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment);
+        enableButtons(false);
         playerTask.execute(mTrack.getPreviewUrl(), changedSong);
+    }
+
+    public void enableButtons(boolean enable) {
+        ViewHolder viewHolder = (ViewHolder) getView().getTag();
+        viewHolder.playerBack.setEnabled(enable);
+        viewHolder.playerPlayPause.setEnabled(enable);
+        viewHolder.playerNext.setEnabled(enable);
     }
 
     @Override
@@ -216,6 +224,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         } else {
             Log.e(LOG_TAG, "Error setting progress bar");
         }
+        enableButtons(true);
     }
 
     private static class PlayerTask extends AsyncTask<Object, Void, Integer> {
