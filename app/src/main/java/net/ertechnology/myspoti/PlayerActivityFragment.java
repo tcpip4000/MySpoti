@@ -165,6 +165,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     }
 
     private void updateView(ViewHolder viewHolder) {
+        viewHolder.playerAlbum.setText(mTrack.getAlbumName());
         viewHolder.playerSong.setText(mTrack.getName());
         Picasso.with(getActivity())
                 .load(mTrack.getImages().get(0))
@@ -287,6 +288,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
 
     private static class ViewHolder {
         final TextView playerArtist;
+        final TextView playerAlbum;
         final TextView playerSong;
         final ImageView playerImage;
         final SeekBar playerProgressBar;
@@ -294,8 +296,10 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         final ImageButton playerPlayPause;
         final ImageButton playerNext;
 
+
         public ViewHolder(View view) {
             playerArtist = (TextView) view.findViewById(R.id.player_artist);
+            playerAlbum = (TextView) view.findViewById(R.id.player_album);
             playerSong = (TextView) view.findViewById(R.id.player_song);
             playerImage  = (ImageView) view.findViewById(R.id.player_image);
             playerProgressBar  = (SeekBar) view.findViewById(R.id.player_progressBar);
