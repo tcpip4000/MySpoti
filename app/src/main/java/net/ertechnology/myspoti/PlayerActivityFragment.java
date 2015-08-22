@@ -21,6 +21,7 @@ import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -222,14 +223,17 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         final ViewHolder viewHolder;
         if (getView() != null && (viewHolder = (ViewHolder) getView().getTag()) != null && msg == 0) {
 
-            viewHolder.playerProgressBar.setMax(sMediaPlayer.getDuration() / 1000);
+            int totalTime = sMediaPlayer.getDuration() ;
+            viewHolder.playerProgressBar.setMax(totalTime / 1000);
+            viewHolder.playerTotalTime.setText(ConvertToMinSec(totalTime));
 
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     if (sMediaPlayer != null) {
-                        int currentPosition = sMediaPlayer.getCurrentPosition() / 1000;
-                        viewHolder.playerProgressBar.setProgress(currentPosition);
+                        int currentPosition = sMediaPlayer.getCurrentPosition();
+                        viewHolder.playerProgressBar.setProgress(currentPosition / 1000);
+                        viewHolder.playerCurrentTime.setText(ConvertToMinSec(currentPosition));
                     }
                     mHandler.postDelayed(this, 1000);
                 }
@@ -238,6 +242,14 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
             Log.e(LOG_TAG, "Error setting progress bar");
         }
         enableButtons(true, null);
+    }
+
+    private String ConvertToMinSec(int milliseconds) {
+        return String.format("%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(milliseconds),
+                TimeUnit.MILLISECONDS.toSeconds(milliseconds) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(milliseconds))
+                );
     }
 
     private static class PlayerTask extends AsyncTask<Object, Void, Integer> {
@@ -295,6 +307,8 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         final ImageButton playerBack;
         final ImageButton playerPlayPause;
         final ImageButton playerNext;
+        final TextView playerCurrentTime;
+        final TextView playerTotalTime;
 
 
         public ViewHolder(View view) {
@@ -306,6 +320,8 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
             playerBack  = (ImageButton) view.findViewById(R.id.player_back);
             playerPlayPause = (ImageButton) view.findViewById(R.id.player_play_stop);
             playerNext = (ImageButton) view.findViewById(R.id.player_next);
+            playerCurrentTime = (TextView) view.findViewById(R.id.player_current_time);
+            playerTotalTime = (TextView) view.findViewById(R.id.player_total_time);
         }
     }
 

@@ -12,4 +12,5 @@
     <string name="back_button">Back Button</string>
     <string name="play_pause_button">Play Pause Button</string>
     <string name="next_button">Next Button</string>
+    <string name="player_zero_time">0:00</string>
 </resources>
