@@ -71,64 +71,65 @@ public class HitActivityFragment extends Fragment implements AsyncResponse {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mArtistId = getArguments().getString(HIT_ARTIST_ID);
-        mArtistName = getArguments().getString(HIT_ARTIST_NAME);
+        if (getArguments() != null &&
+                getArguments().containsKey(HIT_ARTIST_ID) &&
+                getArguments().containsKey(HIT_ARTIST_NAME)) {
+            mArtistId = getArguments().getString(HIT_ARTIST_ID);
+            mArtistName = getArguments().getString(HIT_ARTIST_NAME);
+        } else {
+            mArtistId = null;
+            mArtistName = null;
+        }
     }
 
     public interface HitActivityListener {
         void hitListener(ArrayList<MyTrack> myTrack, String trackId, String artistName);
     }
 
-   /* private String getArtistId() {
-        if (getArguments() != null) {
-            return getArguments().getString(HIT_ARTIST_ID);
-        } else {
-            return  null;
-        }
-    }*/
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_hit, container, false);
-        ViewHolder viewHolder;
 
-        if (view.getTag() == null) {
-            viewHolder = new ViewHolder(view);
-            view.setTag(viewHolder);
-        } else {
-            viewHolder = (ViewHolder) view.getTag();
-        }
+        if (mArtistId != null && mArtistName != null) {
+            ViewHolder viewHolder;
 
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setTitle(getResources().getString(R.string.title_activity_hit));
-        }
-
-        if (savedInstanceState == null) {
-            //String artistId = getArtistId();
-            if (mArtistId != null) {
-                Log.d(LOG_TAG, "Received id:" + mArtistId);
-                GetTrackListTask getTrackListTask = new GetTrackListTask();
-                getTrackListTask.delegate = this;
-                getTrackListTask.execute(mArtistId);
+            if (view.getTag() == null) {
+                viewHolder = new ViewHolder(view);
+                view.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) view.getTag();
             }
-        } else {
-            mTrackList = savedInstanceState.getParcelableArrayList(HIT_ACTIVITY_ARRAY);
-            if (mTrackList != null) {
-                mHitAdapter = new HitAdapter(getActivity(), mTrackList);
-                viewHolder.listView.setAdapter(mHitAdapter);
+
+            ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(getResources().getString(R.string.title_activity_hit));
             }
+
+            if (savedInstanceState == null) {
+                //String artistId = getArtistId();
+                if (mArtistId != null) {
+                    Log.d(LOG_TAG, "Received id:" + mArtistId);
+                    GetTrackListTask getTrackListTask = new GetTrackListTask();
+                    getTrackListTask.delegate = this;
+                    getTrackListTask.execute(mArtistId);
+                }
+            } else {
+                mTrackList = savedInstanceState.getParcelableArrayList(HIT_ACTIVITY_ARRAY);
+                if (mTrackList != null) {
+                    mHitAdapter = new HitAdapter(getActivity(), mTrackList);
+                    viewHolder.listView.setAdapter(mHitAdapter);
+                }
+            }
+
+            viewHolder.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    MyTrack myTrack = mHitAdapter.getItem(position);
+                    mCallback.hitListener(mTrackList, myTrack.getId(), mArtistName);
+                }
+            });
         }
-
-        viewHolder.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MyTrack myTrack = mHitAdapter.getItem(position);
-                mCallback.hitListener(mTrackList, myTrack.getId(), mArtistName);
-            }
-        });
-
         return view;
     }
 
