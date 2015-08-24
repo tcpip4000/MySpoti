@@ -33,7 +33,17 @@
 
         <service
             android:name=".PlayerService"
-            android:label="@string/player_service"
+            android:exported="false"
+            android:label="@string/player_service" >
+        </service>
+        <service
+            android:name=".PlayerService2"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
+        <service
+            android:name=".PlayerService3"
+            android:enabled="true"
             android:exported="false" >
         </service>
     </application>

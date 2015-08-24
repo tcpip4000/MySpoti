@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Messenger;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -43,6 +44,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
 
     PlayerService mService;
     boolean mBound = false;
+    private boolean mIsPlaying;
 
     public PlayerActivityFragment() {
     }
@@ -51,7 +53,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     public void onStart() {
         super.onStart();
 
-//        PlayerService.startPlayerService(getActivity(), mConnection);
+        //PlayerService.playPlayerService(getActivity(), mConnection);
     }
 
     @Override
@@ -63,13 +65,14 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         PlayerResponse pr = findTrack(trackId, mTrackList);
         mTrack = pr.mTrack;
 
-        PlayerService.startPlayerService(getActivity(), mConnection, mTrack.getPreviewUrl());
+        //PlayerService.playPlayerService(getActivity(), mConnection, mTrack.getPreviewUrl());
 
         mIndex = pr.mIndex;
         sMediaPlayer = new MediaPlayer();
         sIsPrepared = false;
         mHandler = new Handler();
         mPreviousPlaying = true;
+        mIsPlaying = false;
     }
 
     private PlayerResponse findTrack(String trackId, ArrayList<MyTrack> trackList) {
@@ -103,38 +106,44 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         //enableButtons(false, view);
         //asyncPlay(false);
 
-        Log.d(LOG_TAG, "mBound onCreateView:" + Boolean.toString(mBound));
+/*        Log.d(LOG_TAG, "mBound onCreateView:" + Boolean.toString(mBound));
         if (mBound) {
             Log.d(LOG_TAG, "Starting play url: " + mTrack.getPreviewUrl());
             mService.play(mTrack.getPreviewUrl());
-        }
+        }*/
 
         // Listeners
         viewHolder.playerPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Log.d(LOG_TAG, "mBound setOnClickListener: " + Boolean.toString(mBound));
-                if (mBound) {
+                if (mIsPlaying) {
+                    PlayerService.pausePlayerService(getActivity());
+                    mIsPlaying = false;
+                } else {
+                    PlayerService.playPlayerService(getActivity(), mTrack.getPreviewUrl());
+                    mIsPlaying = true;
+                }
+                /*if (mBound) {
                     Log.d(LOG_TAG, "Starting play url: " + mTrack.getPreviewUrl());
                     mService.play(mTrack.getPreviewUrl());
-                }
+                }*/
 
-                /*if (mBound) {
-                    if (mService.isPlaying()) {
-                        mService.pause();
-                        viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
+                /*if (mService.isPlaying()) {
+                    mService.pause();
+                    viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
+                } else {
+                    if (!sIsPrepared) {
+                        //enableButtons(false, null);
+                        sIsPrepared = true;
+                        //mService.play(mTrack.getPreviewUrl());
+                        PlayerService.playPlayerService(getActivity(), mTrack.getPreviewUrl());
                     } else {
-                        if (!sIsPrepared) {
-                            //enableButtons(false, null);
-                            sIsPrepared = true;
-                            mService.play(mTrack.getPreviewUrl());
-                        } else {
-                            mService.start();
-                            //sMediaPlayer.start();
-                        }
-                        viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_pause);
+                        PlayerService.startPlayerService(getActivity());
+                        //mService.start();
+                        //sMediaPlayer.start();
                     }
+                    viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_pause);
                 }*/
 
                 /*if (sMediaPlayer.isPlaying()) {
@@ -365,6 +374,12 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
             PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
+
+            /*if (!mService.isPlaying()) {
+                mService.play(mTrack.getPreviewUrl()); // Play the first time
+                sIsPrepared = true;
+            }*/
+            Log.d(LOG_TAG, "mBound data:" + mService.data.toString());
             Log.d(LOG_TAG, "mBound onServiceConnected:" + Boolean.toString(mBound));
         }
 

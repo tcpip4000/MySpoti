@@ -1,11 +1,9 @@
 package net.ertechnology.myspoti;
 
 import android.app.IntentService;
-import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
@@ -14,6 +12,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,7 +26,8 @@ public class PlayerService extends IntentService {
     // TODO: Rename actions, choose action names that describe tasks that this
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_PLAY = "net.ertechnology.myspoti.action.PLAY";
-    private static final String ACTION_PAUSE = "net.ertechnology.myspoti.action.BAZ";
+    private static final String ACTION_START = "net.ertechnology.myspoti.action.START";
+    private static final String ACTION_PAUSE = "net.ertechnology.myspoti.action.PAUSE";
 
     // TODO: Rename parameters
     private static final String EXTRA_URL = "net.ertechnology.myspoti.extra.PARAM1";
@@ -36,31 +36,48 @@ public class PlayerService extends IntentService {
     private static final String LOG_TAG = PlayerService.class.getSimpleName();
     private static final int SERVICE_NOTIFICATION_ID = 1;
 
+
     private final IBinder mBinder = new LocalBinder();
     private static boolean sIsPrepared;
-    private static MediaPlayer sMediaPlayer;
+    private static MediaPlayer sMediaPlayer = new MediaPlayer();
+    public Date data = new Date();
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        Notification notification = new Notification.Builder(getBaseContext())
-                .setContentTitle("playerx")
-                .setContentText("sing a song")
-                .build();
-        startForeground(SERVICE_NOTIFICATION_ID, notification);
-
         sIsPrepared = false;
         sMediaPlayer = new MediaPlayer();
     }
 
-    public static void startPlayerService(Context context, ServiceConnection connection, String url) {
+    public static void playPlayerService(Context context, String url) {
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(ACTION_PLAY);
         intent.putExtra(EXTRA_URL, url);
-        boolean bolean = context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        Log.d(LOG_TAG, "Binded to service startPlayerService: " + Boolean.toString(bolean));
+        context.startService(intent);
+        //boolean bolean = context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        //Log.d(LOG_TAG, "Binded to service playPlayerService: " + Boolean.toString(bolean));
     }
+
+    public static void startPlayerService(Context context) {
+        Intent intent = new Intent(context, PlayerService.class);
+        intent.setAction(ACTION_START);
+        context.startService(intent);
+    }
+
+    public static void pausePlayerService(Context context) {
+        Intent intent = new Intent(context, PlayerService.class);
+        intent.setAction(ACTION_PAUSE);
+        context.startService(intent);
+    }
+
+/*   // Destroys when rotated
+    @Override
+    public void onDestroy() {
+        sMediaPlayer.release();
+        sMediaPlayer = null;
+        super.onDestroy();
+    }*/
 
     public PlayerService() {
         super("PlayerService");
@@ -68,15 +85,19 @@ public class PlayerService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_PLAY.equals(action)) {
-                //asyncPlay(intent.getStringExtra(EXTRA_URL));
-                Log.d(LOG_TAG, "onHandleIntent ok");
+                play(intent.getStringExtra(EXTRA_URL));
+                Log.d(LOG_TAG, "PLAY");
+            } else if (ACTION_START.equals(action)) {
+                start();
+                Log.d(LOG_TAG, "START");
+            } else if (ACTION_PAUSE.equals(action)) {
+                pause();
+                Log.d(LOG_TAG, "PAUSE");
             }
         }
-
     }
 
     /**
@@ -138,7 +159,7 @@ public class PlayerService extends IntentService {
     }
 
     private void asyncPlay(String url) {
-        Log.d(LOG_TAG, "ASYNC STARTED");
+        Log.d(LOG_TAG, "ASYNC STARTED playing url:" + url);
         PlayerTask playerTask = new PlayerTask();
         //playerTask.delegate = (AsyncResponseMediaPlayer) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment);
         playerTask.execute(url);
