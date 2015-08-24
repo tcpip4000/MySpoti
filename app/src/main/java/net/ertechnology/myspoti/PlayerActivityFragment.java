@@ -1,10 +1,13 @@
 package net.ertechnology.myspoti;
 
+import android.content.ComponentName;
+import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -38,6 +41,9 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     private Handler mHandler;
     private static boolean mPreviousPlaying;
 
+    PlayerService mService;
+    boolean mBound = false;
+
     public PlayerActivityFragment() {
     }
 
@@ -54,6 +60,8 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         sIsPrepared = false;
         mHandler = new Handler();
         mPreviousPlaying = true;
+
+        PlayerService.startActionPlay(getActivity(), mConnection, "param1", "param2");
     }
 
     private PlayerResponse findTrack(String trackId, ArrayList<MyTrack> trackList) {
@@ -87,6 +95,13 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         enableButtons(false, view);
         asyncPlay(false);
 
+
+        if (mBound) {
+            boolean data = mService.isPlaying();
+            Log.d(LOG_TAG, "Playing from activity:" + data);
+        }
+
+
         // Listeners
         viewHolder.playerPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,6 +109,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
 
                 if (sMediaPlayer.isPlaying()) {
                     sMediaPlayer.pause();
+
                     viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
                 } else {
                     if (!sIsPrepared) {
@@ -163,6 +179,20 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         });
 
         return view;
+    }
+
+    /**
+     * Called when the Fragment is no longer started.  This is generally
+     * tied to {@link Activity#onStop() Activity.onStop} of the containing
+     * Activity's lifecycle.
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mBound) {
+            getActivity().unbindService(mConnection);
+            mBound = false;
+        }
     }
 
     private void updateView(ViewHolder viewHolder) {
@@ -297,6 +327,22 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         sMediaPlayer = null;
         super.onDestroy();
     }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mBound = false;
+        }
+    };
+
+
 
     private static class ViewHolder {
         final TextView playerArtist;

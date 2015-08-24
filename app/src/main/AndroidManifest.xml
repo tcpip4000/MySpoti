@@ -25,11 +25,17 @@
             android:name=".PlayerActivity"
             android:label="@string/title_activity_player"
             android:parentActivityName=".MainActivity"
-            android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar">
+            android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="net.ertechnology.myspoti.MainActivity" />
         </activity>
+
+        <service
+            android:name=".PlayerService"
+            android:label="@string/player_service"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>
