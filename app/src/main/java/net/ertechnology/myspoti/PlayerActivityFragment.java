@@ -48,6 +48,13 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        PlayerService.startActionPlay(getActivity(), mConnection, "param1", "param2");
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mArtistName = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_ARTIST_NAME);
@@ -60,8 +67,6 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         sIsPrepared = false;
         mHandler = new Handler();
         mPreviousPlaying = true;
-
-        PlayerService.startActionPlay(getActivity(), mConnection, "param1", "param2");
     }
 
     private PlayerResponse findTrack(String trackId, ArrayList<MyTrack> trackList) {
@@ -95,17 +100,22 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         enableButtons(false, view);
         asyncPlay(false);
 
-
+/*        Log.d(LOG_TAG, "mBound onCreateView:" + Boolean.toString(mBound));
         if (mBound) {
             boolean data = mService.isPlaying();
-            Log.d(LOG_TAG, "Playing from activity:" + data);
-        }
-
+            Log.d(LOG_TAG, "is playing onCreateView:" + Boolean.toString(data));
+        }*/
 
         // Listeners
         viewHolder.playerPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                Log.d(LOG_TAG, "mBound setOnClickListener: " + Boolean.toString(mBound));
+                if (mBound) {
+                    boolean data = mService.isPlaying();
+                    Log.d(LOG_TAG, "is playing onCreateView: " + Boolean.toString(data));
+                }
 
                 if (sMediaPlayer.isPlaying()) {
                     sMediaPlayer.pause();
@@ -192,6 +202,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         if (mBound) {
             getActivity().unbindService(mConnection);
             mBound = false;
+            Log.d(LOG_TAG, "mBound onStop:" + Boolean.toString(mBound));
         }
     }
 
@@ -334,15 +345,16 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
             PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
+            Log.d(LOG_TAG, "mBound onServiceConnected:" + Boolean.toString(mBound));
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mBound = false;
+            Log.d(LOG_TAG, "mBound onServiceDisconnected:" + Boolean.toString(mBound));
+
         }
     };
-
-
 
     private static class ViewHolder {
         final TextView playerArtist;

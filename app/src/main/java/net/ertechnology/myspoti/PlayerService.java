@@ -1,10 +1,9 @@
 package net.ertechnology.myspoti;
 
 import android.app.IntentService;
-import android.app.Notification;
 import android.app.Service;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
@@ -60,8 +59,10 @@ public class PlayerService extends IntentService {
         intent.setAction(ACTION_PLAY);
         intent.putExtra(EXTRA_PARAM1, param1);
         intent.putExtra(EXTRA_PARAM2, param2);
-        context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        boolean bolean = context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        Log.d(LOG_TAG, "Binded to service startActionPlay: " + Boolean.toString(bolean));
     }
+
     /*public static void startActionPlay(Context context, String param1, String param2) {
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(ACTION_PLAY);
@@ -91,8 +92,6 @@ public class PlayerService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-
-
 
         if (intent != null) {
             final String action = intent.getAction();
