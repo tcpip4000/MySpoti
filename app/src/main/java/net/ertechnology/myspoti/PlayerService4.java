@@ -9,6 +9,7 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -26,6 +27,16 @@ public class PlayerService4 extends Service {
     private final IBinder mBinder = new LocalBinder();
     private static boolean sIsPrepared = false;
 
+
+
+    public void stop() {
+        sMediaPlayer.stop();
+    }
+
+    public void reset() {
+        sMediaPlayer.reset();
+    }
+
     public class LocalBinder extends Binder {
         PlayerService4 getService() {
             return PlayerService4.this;
@@ -36,7 +47,17 @@ public class PlayerService4 extends Service {
         context.bindService(new Intent(context, PlayerService4.class),
                 connection,
                 Context.BIND_AUTO_CREATE);
+
     }
+
+    private void publishResults(String command, int result) {
+        Intent intent = new Intent(PlayerActivityFragment.NOTIFICATION);
+        intent.putExtra(PlayerActivityFragment.COMMAND, command);
+        intent.putExtra(PlayerActivityFragment.RESULT, result);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        Log.d(LOG_TAG, "BROADCAST SENDED");
+    }
+
   /*  class IncomingHandler extends Handler {
 
         @Override
@@ -76,6 +97,13 @@ public class PlayerService4 extends Service {
 
     public void play(String url) {
         asyncPlay(url);
+        sMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                //viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
+                publishResults(PlayerActivityFragment.CMD_END_SONG, 1);
+            }
+        });
     }
 
     public void pause() {
@@ -134,5 +162,6 @@ public class PlayerService4 extends Service {
             delegate.processFinish(msg);
         }*/
     }
+
 
 }

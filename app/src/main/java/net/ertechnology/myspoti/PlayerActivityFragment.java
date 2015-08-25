@@ -1,13 +1,17 @@
 package net.ertechnology.myspoti;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +33,15 @@ import java.util.concurrent.TimeUnit;
 public class PlayerActivityFragment extends Fragment {
 
     private static final String LOG_TAG = PlayerActivityFragment.class.getSimpleName();
+    private static final String PLAYER_PREVIOUS_PLAY = "PLAYPPLAY";
+    private static final String PLAYER_FIRST_TIME = "PLAYERFTIME";
+
+    public static final String NOTIFICATION = "net.ertechnology.myspoti.service.receiver";
+    public static final String COMMAND = "COMMAND";
+    public static final String RESULT = "RESULT";
+    public static final String CMD_END_SONG = "CMD_END_SONG";
+    private PlayReceiver mPlayReceiver;
+
     private static final String PLAYER_ARTIST = "PLAYART";
     private static final String PLAYER_LIST = "PLAYLST";
     private static final String PLAYER_TRACK_ID = "PLAYIND";
@@ -40,8 +53,8 @@ public class PlayerActivityFragment extends Fragment {
     private MyTrack mTrack;
     private int mIndex;
     private static MediaPlayer sMediaPlayer;
-    private static boolean sPreviousPlaying = true;
-    private static boolean sFirstTime = true;
+    private boolean sPreviousPlaying = true;
+    private boolean sFirstTime = true;
 
     PlayerService4 mService = null;
     boolean mBound = false;
@@ -52,23 +65,28 @@ public class PlayerActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+
+        IntentFilter playFilter = new IntentFilter(PlayerActivityFragment.NOTIFICATION);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mPlayReceiver, playFilter);
+
         PlayerService4.bindService(getActivity(), mConnection);
+
         //PlayerService.playPlayerService(getActivity(), mConnection);
         //getActivity().bindService(new Intent(getActivity(), PlayerService3.class), mConnection,
         //        Context.BIND_AUTO_CREATE);
     }
 
     @Override
-    /*public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(PLAYER_PREVIOUS_PLAY, sPreviousPlaying);
-        outState.putBoolean(PLAYER_BOUND, mBound);
-        *//*outState.putString(PLAYER_ARTIST, mArtistName);
+        outState.putBoolean(PLAYER_FIRST_TIME, sFirstTime);
+        /*outState.putString(PLAYER_ARTIST, mArtistName);
         outState.putParcelableArrayList(PLAYER_LIST, mTrackList);
         outState.putString(PLAYER_TRACK_ID, mTrack.getId());
         outState.putParcelable(PLAYER_SERVICE, mService);
-        outState.putBoolean(PLAYER_BOUND, mBound);*//*
+        outState.putBoolean(PLAYER_BOUND, mBound);*/
         super.onSaveInstanceState(outState);
-    }*/
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,7 +98,16 @@ public class PlayerActivityFragment extends Fragment {
         PlayerResponse pr = findTrack(trackId, mTrackList);
         mTrack = pr.mTrack;
         mIndex = pr.mIndex;
+        sMediaPlayer = new MediaPlayer();
+        mPlayReceiver = new PlayReceiver();
 
+        if (savedInstanceState != null) {
+            sPreviousPlaying = savedInstanceState.getBoolean(PLAYER_PREVIOUS_PLAY);
+            sFirstTime = savedInstanceState.getBoolean(PLAYER_FIRST_TIME);
+        } else {
+            sPreviousPlaying = true;
+            sFirstTime = true;
+        }
 
 //        PlayerService4.bindService(getActivity(), mConnection);
 
@@ -90,10 +117,8 @@ public class PlayerActivityFragment extends Fragment {
         //PlayerService.playPlayerService(getActivity(), mConnection, mTrack.getPreviewUrl());
 
 
-        sMediaPlayer = new MediaPlayer();
+
         //sIsPrepared = false;
-        mHandler = new Handler();
-        mIsPlaying = false;
 
         /*if (savedInstanceState == null) {
             mArtistName = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_ARTIST_NAME);
@@ -188,6 +213,13 @@ public class PlayerActivityFragment extends Fragment {
             }
         });
 
+        sMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
+            }
+        });
+
 /*        sMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -259,6 +291,7 @@ public class PlayerActivityFragment extends Fragment {
             mBound = false;
             Log.d(LOG_TAG, "mBound onStop:" + Boolean.toString(mBound));
         }
+
     }
 
     private void updateView(ViewHolder viewHolder) {
@@ -270,6 +303,13 @@ public class PlayerActivityFragment extends Fragment {
         if (sPreviousPlaying) {
             viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_pause);
         } else {
+            viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
+        }
+    }
+
+    private void updateViewSongPaused() {
+        ViewHolder viewHolder;
+        if (getView() != null && (viewHolder = (ViewHolder) getView().getTag()) != null) {
             viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
         }
     }
@@ -391,10 +431,14 @@ public class PlayerActivityFragment extends Fragment {
     public void onDestroy() {
         sMediaPlayer.release();
         sMediaPlayer = null;
+      /*  if (mService.isPlaying()) {
+            mService.pause();
+        }
+        mService.stopSelf();*/
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mPlayReceiver);
+        Log.d(LOG_TAG, "STOPPING");
         super.onDestroy();
     }
-
-
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -407,6 +451,10 @@ public class PlayerActivityFragment extends Fragment {
             Log.d(LOG_TAG, "Firstime:" + Boolean.toString(sFirstTime));
 
             if (sFirstTime) {
+                if (mService.isPrepared()) {
+                    mService.stop();
+                    mService.reset();
+                }
                 mService.play(mTrack.getPreviewUrl()); // Play the first time
                 sFirstTime = false;
                 //updateViewIsPlay(true);
@@ -423,17 +471,6 @@ public class PlayerActivityFragment extends Fragment {
             Log.d(LOG_TAG, "mBound onServiceDisconnected:" + Boolean.toString(mBound));
         }
     };
-
-   private void updateViewIsPlay(boolean isPlay) {
-        ViewHolder viewHolder;
-        if (getView() != null && (viewHolder = (ViewHolder) getView().getTag()) != null) {
-            if (isPlay) {
-                viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_pause);
-            } else {
-                viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
-            }
-        }
-    }
 
     private static class ViewHolder {
         final TextView playerArtist;
@@ -458,6 +495,23 @@ public class PlayerActivityFragment extends Fragment {
             playerNext = (ImageButton) view.findViewById(R.id.player_next);
             playerCurrentTime = (TextView) view.findViewById(R.id.player_current_time);
             playerTotalTime = (TextView) view.findViewById(R.id.player_total_time);
+        }
+    }
+
+    public class PlayReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String command = intent.getStringExtra(PlayerActivityFragment.COMMAND);
+            switch (command) {
+                case CMD_END_SONG:
+                    int result = intent.getIntExtra(PlayerActivityFragment.RESULT, -1);
+                    Log.d(LOG_TAG, "RECEIVED DATA: " + Integer.toString(result));
+                    updateViewSongPaused();
+                    break;
+                default:
+                    Log.d(LOG_TAG, "Local Receiver command unknown:" + command);
+            }
         }
     }
 
