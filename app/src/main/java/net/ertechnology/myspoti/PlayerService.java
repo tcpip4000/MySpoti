@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
@@ -50,12 +51,12 @@ public class PlayerService extends IntentService {
         sMediaPlayer = new MediaPlayer();
     }
 
-    public static void playPlayerService(Context context, String url) {
+    public static void playPlayerService(Context context, ServiceConnection connection, String url) {
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(ACTION_PLAY);
         intent.putExtra(EXTRA_URL, url);
         context.startService(intent);
-        //boolean bolean = context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+       // boolean bolean = context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
         //Log.d(LOG_TAG, "Binded to service playPlayerService: " + Boolean.toString(bolean));
     }
 

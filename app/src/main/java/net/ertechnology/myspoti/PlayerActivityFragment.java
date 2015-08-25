@@ -1,6 +1,8 @@
 package net.ertechnology.myspoti;
 
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -8,7 +10,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -33,6 +37,12 @@ import java.util.concurrent.TimeUnit;
 public class PlayerActivityFragment extends Fragment implements AsyncResponseMediaPlayer {
 
     private static final String LOG_TAG = PlayerActivityFragment.class.getSimpleName();
+    private static final String PLAYER_ARTIST = "PLAYART";
+    private static final String PLAYER_LIST = "PLAYLST";
+    private static final String PLAYER_TRACK_ID = "PLAYIND";
+    private static final String PLAYER_SERVICE = "PLAYSER";
+    private static final String PLAYER_BOUND = "PLAYBOU";
+    private static final String PLAYER_CONN = "PLAYCON";
     private ArrayList<MyTrack> mTrackList;
     private String mArtistName;
     private MyTrack mTrack;
@@ -42,8 +52,9 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     private Handler mHandler;
     private static boolean mPreviousPlaying;
 
-    PlayerService mService;
+    PlayerService4 mService = null;
     boolean mBound = false;
+
     private boolean mIsPlaying;
 
     public PlayerActivityFragment() {
@@ -54,17 +65,32 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         super.onStart();
 
         //PlayerService.playPlayerService(getActivity(), mConnection);
+        //getActivity().bindService(new Intent(getActivity(), PlayerService3.class), mConnection,
+        //        Context.BIND_AUTO_CREATE);
     }
+
+/*    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString(PLAYER_ARTIST, mArtistName);
+        outState.putParcelableArrayList(PLAYER_LIST, mTrackList);
+        outState.putString(PLAYER_TRACK_ID, mTrack.getId());
+        outState.putParcelable(PLAYER_SERVICE, mService);
+        outState.putBoolean(PLAYER_BOUND, mBound);
+        super.onSaveInstanceState(outState);
+    }*/
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         mArtistName = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_ARTIST_NAME);
         mTrackList = getActivity().getIntent().getParcelableArrayListExtra(PlayerActivity.PLAYER_TRACKS);
         String trackId = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_TRACK_ID);
         PlayerResponse pr = findTrack(trackId, mTrackList);
         mTrack = pr.mTrack;
 
+        getActivity().bindService(new Intent(getActivity(), PlayerService4.class), mConnection,
+                Context.BIND_AUTO_CREATE);
         //PlayerService.playPlayerService(getActivity(), mConnection, mTrack.getPreviewUrl());
 
         mIndex = pr.mIndex;
@@ -73,6 +99,44 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         mHandler = new Handler();
         mPreviousPlaying = true;
         mIsPlaying = false;
+
+        /*if (savedInstanceState == null) {
+            mArtistName = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_ARTIST_NAME);
+            mTrackList = getActivity().getIntent().getParcelableArrayListExtra(PlayerActivity.PLAYER_TRACKS);
+            String trackId = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_TRACK_ID);
+            PlayerResponse pr = findTrack(trackId, mTrackList);
+            mTrack = pr.mTrack;
+
+            getActivity().bindService(new Intent(getActivity(), PlayerService3.class), mConnection,
+                    Context.BIND_AUTO_CREATE);
+            //PlayerService.playPlayerService(getActivity(), mConnection, mTrack.getPreviewUrl());
+
+            mIndex = pr.mIndex;
+            sMediaPlayer = new MediaPlayer();
+            sIsPrepared = false;
+            mHandler = new Handler();
+            mPreviousPlaying = true;
+            mIsPlaying = false;
+        } else {
+            mArtistName = savedInstanceState.getString(PLAYER_ARTIST);
+            mTrackList = savedInstanceState.getParcelableArrayList(PLAYER_LIST);
+            String trackId = savedInstanceState.getString(PLAYER_TRACK_ID);
+            PlayerResponse pr = findTrack(trackId, mTrackList);
+            mTrack = pr.mTrack;
+            mIndex = pr.mIndex;
+
+            getActivity().bindService(new Intent(getActivity(), PlayerService3.class), mConnection,
+                    Context.BIND_AUTO_CREATE);
+            //PlayerService.playPlayerService(getActivity(), mConnection, mTrack.getPreviewUrl());
+
+            sMediaPlayer = new MediaPlayer();
+            sIsPrepared = false;
+            mHandler = new Handler();
+            mPreviousPlaying = true;
+            //mIsPlaying = false;
+            mService = savedInstanceState.getParcelable(PLAYER_SERVICE);
+            mBound = savedInstanceState.getBoolean(PLAYER_BOUND);
+        }*/
     }
 
     private PlayerResponse findTrack(String trackId, ArrayList<MyTrack> trackList) {
@@ -116,14 +180,16 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
         viewHolder.playerPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (mIsPlaying) {
+                if (mBound) {
+                    Log.d(LOG_TAG, mService.helloWorld("hola"));
+                }
+                /*if (mIsPlaying) {
                     PlayerService.pausePlayerService(getActivity());
                     mIsPlaying = false;
                 } else {
                     PlayerService.playPlayerService(getActivity(), mTrack.getPreviewUrl());
                     mIsPlaying = true;
-                }
+                }*/
                 /*if (mBound) {
                     Log.d(LOG_TAG, "Starting play url: " + mTrack.getPreviewUrl());
                     mService.play(mTrack.getPreviewUrl());
@@ -371,7 +437,8 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
+            //mService= new Messenger(service);
+            PlayerService4.LocalBinder binder = (PlayerService4.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
 
@@ -379,17 +446,30 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
                 mService.play(mTrack.getPreviewUrl()); // Play the first time
                 sIsPrepared = true;
             }*/
-            Log.d(LOG_TAG, "mBound data:" + mService.data.toString());
+            //Log.d(LOG_TAG, "mBound data:" + mService.data.toString());
             Log.d(LOG_TAG, "mBound onServiceConnected:" + Boolean.toString(mBound));
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            //mService = null;
             mBound = false;
             Log.d(LOG_TAG, "mBound onServiceDisconnected:" + Boolean.toString(mBound));
-
         }
     };
+
+    /*public void sayHello() {
+        if (!mBound) return;
+        // Create and send a message to the service, using a supported 'what' value
+        Message msg = Message.obtain(null, PlayerService3.MSG_SAY_HELLO, 0, 0);
+        try {
+            mService.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }*/
+
+
 
     private static class ViewHolder {
         final TextView playerArtist;

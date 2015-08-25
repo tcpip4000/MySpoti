@@ -4,10 +4,10 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.Messenger;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,17 +15,23 @@ import java.io.IOException;
 import java.util.Date;
 
 
-public class PlayerService3 extends Service {
+public class PlayerService4 extends Service {
 
     static final int MSG_SAY_HELLO = 1;
     static final int MSG_SAY_PAUSE = 2;
     public static final Date mDate = new Date();
-    private static final String LOG_TAG = PlayerService3.class.getSimpleName();
+    private static final String LOG_TAG = PlayerService4.class.getSimpleName();
     private static MediaPlayer sMediaPlayer = new MediaPlayer();
     //private static String sUrl;
+    private final IBinder mBinder = new LocalBinder();
+
+    public class LocalBinder extends Binder {
+        PlayerService4 getService() {
+            return PlayerService4.this;
+        }
+    }
 
     class IncomingHandler extends Handler {
-
 
         @Override
         public void handleMessage(Message msg) {
@@ -60,12 +66,16 @@ public class PlayerService3 extends Service {
         }
     }
 
-    final Messenger mMessenger = new Messenger(new IncomingHandler());
+    //final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+    public String helloWorld(String msg) {
+        return  mDate.toString();
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
         Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
         Log.d(LOG_TAG, ">>>>>>>>>>>>>>>>DATE: " + mDate.toString());
-        return mMessenger.getBinder();
+        return mBinder;
     }
 }
