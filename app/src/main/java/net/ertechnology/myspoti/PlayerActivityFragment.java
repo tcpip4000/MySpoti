@@ -182,6 +182,7 @@ public class PlayerActivityFragment extends Fragment implements AsyncResponseMed
             public void onClick(View v) {
                 if (mBound) {
                     Log.d(LOG_TAG, mService.helloWorld("hola"));
+                    mService.play(mTrack.getPreviewUrl());
                 }
                 /*if (mIsPlaying) {
                     PlayerService.pausePlayerService(getActivity());

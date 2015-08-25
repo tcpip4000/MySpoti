@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -38,25 +39,6 @@ public class PlayerService4 extends Service {
             switch (msg.what) {
                 case MSG_SAY_HELLO:
                     Toast.makeText(getApplicationContext(), "hello", Toast.LENGTH_SHORT).show();
-                    try {
-                        sMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        sMediaPlayer.setDataSource("http://d318706lgtcm8e.cloudfront.net/mp3-preview/f454c8224828e21fa146af84916fd22cb89cedc6");
-                        sMediaPlayer.prepare();
-                        sMediaPlayer.start();
-
-                /*if (!changedSong) {
-                    sMediaPlayer.start();
-                } else {
-                    if (mPreviousPlaying) {
-                        sMediaPlayer.start();
-                    }
-                }*/
-                        //sIsPrepared = true;
-                    } catch (IllegalArgumentException e) {
-                        Log.d(LOG_TAG, "Error", e);
-                    } catch (IOException e) {
-                        Log.d(LOG_TAG, "Error", e);
-                    }
                     break;
                 case MSG_SAY_PAUSE:
                     sMediaPlayer.pause();
@@ -77,5 +59,66 @@ public class PlayerService4 extends Service {
         Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
         Log.d(LOG_TAG, ">>>>>>>>>>>>>>>>DATE: " + mDate.toString());
         return mBinder;
+    }
+
+    public void start() {
+        sMediaPlayer.start();
+    }
+
+    public boolean isPlaying() {
+        return sMediaPlayer.isPlaying();
+    }
+
+    public void play(String url) {
+        asyncPlay(url);
+    }
+
+    private void asyncPlay(String url) {
+        Log.d(LOG_TAG, "ASYNC STARTED playing url:" + url);
+        PlayerTask playerTask = new PlayerTask();
+        //playerTask.delegate = (AsyncResponseMediaPlayer) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment);
+        playerTask.execute(url);
+        //mTrack.getPreviewUrl()
+    }
+
+    private static class PlayerTask extends AsyncTask<String, Void, Integer> {
+
+        //AsyncResponseMediaPlayer delegate;
+
+        @Override
+        protected Integer doInBackground(String... params) {
+            String url = params[0];
+            //boolean changedSong = (boolean) params[1];
+            int status = 0;
+
+            try {
+                sMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                sMediaPlayer.setDataSource(url);
+                sMediaPlayer.prepare();
+                sMediaPlayer.start();
+
+                /*if (!changedSong) {
+                    sMediaPlayer.start();
+                } else {
+                    if (mPreviousPlaying) {
+                        sMediaPlayer.start();
+                    }
+                }*/
+                //sIsPrepared = true;
+            } catch (IllegalArgumentException e) {
+                Log.d(LOG_TAG, "Error", e);
+                status = 1;
+            } catch (IOException e) {
+                Log.d(LOG_TAG, "Error", e);
+                status = 2;
+            }
+
+            return status;
+        }
+
+/*        @Override
+        protected void onPostExecute(Integer msg) {
+            delegate.processFinish(msg);
+        }*/
     }
 }
