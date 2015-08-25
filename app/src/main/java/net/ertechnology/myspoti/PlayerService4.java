@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Date;
 
 
-public class PlayerService4 extends Service {
+public class PlayerService4 extends Service implements AsyncResponseMediaPlayer {
 
     private static final String LOG_TAG = PlayerService4.class.getSimpleName();
 
@@ -37,6 +37,14 @@ public class PlayerService4 extends Service {
         sMediaPlayer.reset();
     }
 
+    public int getCurrentPosition() {
+        return sMediaPlayer.getCurrentPosition();
+    }
+
+    public boolean isNotNull() {
+        return sMediaPlayer != null;
+    }
+
     public class LocalBinder extends Binder {
         PlayerService4 getService() {
             return PlayerService4.this;
@@ -50,10 +58,13 @@ public class PlayerService4 extends Service {
 
     }
 
-    private void publishResults(String command, int result) {
+    public int getDuration() {
+        return sMediaPlayer.getDuration();
+    }
+
+    private void publishResults(String command) {
         Intent intent = new Intent(PlayerActivityFragment.NOTIFICATION);
         intent.putExtra(PlayerActivityFragment.COMMAND, command);
-        intent.putExtra(PlayerActivityFragment.RESULT, result);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         Log.d(LOG_TAG, "BROADCAST SENDED");
     }
@@ -97,13 +108,7 @@ public class PlayerService4 extends Service {
 
     public void play(String url) {
         asyncPlay(url);
-        sMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                //viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
-                publishResults(PlayerActivityFragment.CMD_END_SONG, 1);
-            }
-        });
+
     }
 
     public void pause() {
@@ -117,14 +122,24 @@ public class PlayerService4 extends Service {
     private void asyncPlay(String url) {
         Log.d(LOG_TAG, "ASYNC STARTED playing url:" + url);
         PlayerTask playerTask = new PlayerTask();
-        //playerTask.delegate = (AsyncResponseMediaPlayer) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment);
+        playerTask.delegate = this;
         playerTask.execute(url);
-        //mTrack.getPreviewUrl()
+    }
+
+    @Override
+    public void processFinish(Integer duration) {
+        sMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                publishResults(PlayerActivityFragment.CMD_END_SONG);
+            }
+        });
+        publishResults(PlayerActivityFragment.CMD_LENGTH_SONG);
     }
 
     private static class PlayerTask extends AsyncTask<String, Void, Integer> {
 
-        //AsyncResponseMediaPlayer delegate;
+        AsyncResponseMediaPlayer delegate;
 
         @Override
         protected Integer doInBackground(String... params) {
@@ -157,10 +172,10 @@ public class PlayerService4 extends Service {
             return status;
         }
 
-/*        @Override
+        @Override
         protected void onPostExecute(Integer msg) {
-            delegate.processFinish(msg);
-        }*/
+            delegate.processFinish(sMediaPlayer.getDuration());
+        }
     }
 
 

@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -27,6 +28,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -40,6 +42,7 @@ public class PlayerActivityFragment extends Fragment {
     public static final String COMMAND = "COMMAND";
     public static final String RESULT = "RESULT";
     public static final String CMD_END_SONG = "CMD_END_SONG";
+    public static final String CMD_LENGTH_SONG = "CMD_LENGTH_SONG";
     private PlayReceiver mPlayReceiver;
 
     private static final String PLAYER_ARTIST = "PLAYART";
@@ -48,6 +51,7 @@ public class PlayerActivityFragment extends Fragment {
     private static final String PLAYER_SERVICE = "PLAYSER";
     private static final String PLAYER_BOUND = "PLAYBOU";
     private static final String PLAYER_CONN = "PLAYCON";
+
     private ArrayList<MyTrack> mTrackList;
     private String mArtistName;
     private MyTrack mTrack;
@@ -55,6 +59,7 @@ public class PlayerActivityFragment extends Fragment {
     private static MediaPlayer sMediaPlayer;
     private boolean sPreviousPlaying = true;
     private boolean sFirstTime = true;
+    private Handler mHandler;
 
     PlayerService4 mService = null;
     boolean mBound = false;
@@ -100,6 +105,7 @@ public class PlayerActivityFragment extends Fragment {
         mIndex = pr.mIndex;
         sMediaPlayer = new MediaPlayer();
         mPlayReceiver = new PlayReceiver();
+        mHandler = new Handler();
 
         if (savedInstanceState != null) {
             sPreviousPlaying = savedInstanceState.getBoolean(PLAYER_PREVIOUS_PLAY);
@@ -213,20 +219,6 @@ public class PlayerActivityFragment extends Fragment {
             }
         });
 
-        sMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
-            }
-        });
-
-/*        sMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
-            }
-        });*/
-
         viewHolder.playerNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -312,6 +304,29 @@ public class PlayerActivityFragment extends Fragment {
         if (getView() != null && (viewHolder = (ViewHolder) getView().getTag()) != null) {
             viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_play);
         }
+    }
+
+    private void updateViewDuration(int totalTime) {
+        final ViewHolder viewHolder;
+        if (getView() != null && (viewHolder = (ViewHolder) getView().getTag()) != null) {
+            viewHolder.playerProgressBar.setMax(totalTime / 1000);
+            viewHolder.playerTotalTime.setText(ConvertToMinSec(totalTime));
+
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (mService.isNotNull()) {
+                        int currentPosition = mService.getCurrentPosition();
+                        viewHolder.playerProgressBar.setProgress(currentPosition / 1000);
+                        viewHolder.playerCurrentTime.setText(ConvertToMinSec(currentPosition));
+                    }
+                    mHandler.postDelayed(this, 1000);
+                }
+            });
+        } else {
+            Log.e(LOG_TAG, "Error setting progress bar");
+        }
+        enableButtons(true, null);
     }
 
     private int getNextIndex() {
@@ -457,7 +472,8 @@ public class PlayerActivityFragment extends Fragment {
                 }
                 mService.play(mTrack.getPreviewUrl()); // Play the first time
                 sFirstTime = false;
-                //updateViewIsPlay(true);
+            } else {
+                updateViewDuration(mService.getDuration());
             }
 
             //Log.d(LOG_TAG, "mBound data:" + mService.data.toString());
@@ -502,12 +518,15 @@ public class PlayerActivityFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            int result;
             String command = intent.getStringExtra(PlayerActivityFragment.COMMAND);
+            Log.d(LOG_TAG, "RECEIVED COMMAND: " + command);
             switch (command) {
                 case CMD_END_SONG:
-                    int result = intent.getIntExtra(PlayerActivityFragment.RESULT, -1);
-                    Log.d(LOG_TAG, "RECEIVED DATA: " + Integer.toString(result));
                     updateViewSongPaused();
+                    break;
+                case CMD_LENGTH_SONG:
+                    updateViewDuration(mService.getDuration());
                     break;
                 default:
                     Log.d(LOG_TAG, "Local Receiver command unknown:" + command);
