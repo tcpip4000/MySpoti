@@ -1,14 +1,14 @@
 package net.ertechnology.myspoti;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -18,13 +18,13 @@ import java.util.Date;
 
 public class PlayerService4 extends Service {
 
-    static final int MSG_SAY_HELLO = 1;
-    static final int MSG_SAY_PAUSE = 2;
-    public static final Date mDate = new Date();
     private static final String LOG_TAG = PlayerService4.class.getSimpleName();
+
+    public static final Date mDate = new Date();
+
     private static MediaPlayer sMediaPlayer = new MediaPlayer();
-    //private static String sUrl;
     private final IBinder mBinder = new LocalBinder();
+    private static boolean sIsPrepared = false;
 
     public class LocalBinder extends Binder {
         PlayerService4 getService() {
@@ -32,7 +32,12 @@ public class PlayerService4 extends Service {
         }
     }
 
-    class IncomingHandler extends Handler {
+    public static void bindService(Context context, ServiceConnection connection) {
+        context.bindService(new Intent(context, PlayerService4.class),
+                connection,
+                Context.BIND_AUTO_CREATE);
+    }
+  /*  class IncomingHandler extends Handler {
 
         @Override
         public void handleMessage(Message msg) {
@@ -46,7 +51,7 @@ public class PlayerService4 extends Service {
                     super.handleMessage(msg);
             }
         }
-    }
+    }*/
 
     //final Messenger mMessenger = new Messenger(new IncomingHandler());
 
@@ -71,6 +76,14 @@ public class PlayerService4 extends Service {
 
     public void play(String url) {
         asyncPlay(url);
+    }
+
+    public void pause() {
+        sMediaPlayer.pause();
+    }
+
+    public boolean isPrepared() {
+        return sIsPrepared;
     }
 
     private void asyncPlay(String url) {
@@ -104,7 +117,7 @@ public class PlayerService4 extends Service {
                         sMediaPlayer.start();
                     }
                 }*/
-                //sIsPrepared = true;
+                sIsPrepared = true;
             } catch (IllegalArgumentException e) {
                 Log.d(LOG_TAG, "Error", e);
                 status = 1;
@@ -121,4 +134,5 @@ public class PlayerService4 extends Service {
             delegate.processFinish(msg);
         }*/
     }
+
 }
