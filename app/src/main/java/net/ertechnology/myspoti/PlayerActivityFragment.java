@@ -40,17 +40,11 @@ public class PlayerActivityFragment extends Fragment {
 
     public static final String NOTIFICATION = "net.ertechnology.myspoti.service.receiver";
     public static final String COMMAND = "COMMAND";
-    public static final String RESULT = "RESULT";
     public static final String CMD_END_SONG = "CMD_END_SONG";
     public static final String CMD_LENGTH_SONG = "CMD_LENGTH_SONG";
     private PlayReceiver mPlayReceiver;
 
-    private static final String PLAYER_ARTIST = "PLAYART";
-    private static final String PLAYER_LIST = "PLAYLST";
     private static final String PLAYER_TRACK_ID = "PLAYIND";
-    private static final String PLAYER_SERVICE = "PLAYSER";
-    private static final String PLAYER_BOUND = "PLAYBOU";
-    private static final String PLAYER_CONN = "PLAYCON";
 
     private ArrayList<MyTrack> mTrackList;
     private String mArtistName;
@@ -61,8 +55,8 @@ public class PlayerActivityFragment extends Fragment {
     private boolean sFirstTime = true;
     private Handler mHandler;
 
-    PlayerService4 mService = null;
-    boolean mBound = false;
+    private PlayerService4 mService = null;
+    private boolean mBound = false;
 
     public PlayerActivityFragment() {
     }
@@ -75,10 +69,6 @@ public class PlayerActivityFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mPlayReceiver, playFilter);
 
         PlayerService4.bindService(getActivity(), mConnection);
-
-        //PlayerService.playPlayerService(getActivity(), mConnection);
-        //getActivity().bindService(new Intent(getActivity(), PlayerService3.class), mConnection,
-        //        Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -87,10 +77,6 @@ public class PlayerActivityFragment extends Fragment {
         outState.putBoolean(PLAYER_FIRST_TIME, sFirstTime);
         outState.putString(PLAYER_TRACK_ID, mTrack.getId());
 
-        /*outState.putString(PLAYER_ARTIST, mArtistName);
-        outState.putParcelableArrayList(PLAYER_LIST, mTrackList);
-        outState.putParcelable(PLAYER_SERVICE, mService);
-        outState.putBoolean(PLAYER_BOUND, mBound);*/
         super.onSaveInstanceState(outState);
     }
 
@@ -150,7 +136,6 @@ public class PlayerActivityFragment extends Fragment {
 
         // Start playing for first time
         enableButtons(false);
-        //asyncPlay(false);
 
         // Listeners
         viewHolder.playerPlayPause.setOnClickListener(new View.OnClickListener() {
@@ -183,16 +168,13 @@ public class PlayerActivityFragment extends Fragment {
                 if (mIndex != indexOld) {
                     mTrack = mTrackList.get(mIndex);
 
-
                     if (mService.isPlaying()) {
                         sPreviousPlaying = true;
-                        Log.d(LOG_TAG, "PLAYING");
                         mService.stop();
                         mService.reset();
                         mService.play(mTrack.getPreviewUrl(), true);
                     } else {
                         sPreviousPlaying = false;
-                        Log.d(LOG_TAG, "PLAYING PAUSE");
                         mService.stop();
                         mService.reset();
                         mService.play(mTrack.getPreviewUrl(), false);
@@ -202,7 +184,6 @@ public class PlayerActivityFragment extends Fragment {
                         updateView((ViewHolder) getView().getTag());
                     }
                     enableButtons(false);
-
                 }
             }
         });
@@ -210,24 +191,29 @@ public class PlayerActivityFragment extends Fragment {
         viewHolder.playerBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*int indexOld = mIndex;
+                int indexOld = mIndex;
                 mIndex = getPrevIndex();
+
                 if (mIndex != indexOld) {
-                    if (sMediaPlayer.isPlaying()) {
+                    mTrack = mTrackList.get(mIndex);
+
+                    if (mService.isPlaying()) {
                         sPreviousPlaying = true;
-                        sMediaPlayer.stop();
+                        mService.stop();
+                        mService.reset();
+                        mService.play(mTrack.getPreviewUrl(), true);
                     } else {
                         sPreviousPlaying = false;
+                        mService.stop();
+                        mService.reset();
+                        mService.play(mTrack.getPreviewUrl(), false);
                     }
-                    sMediaPlayer.reset();
-                    sIsPrepared = false;
-                    mTrack = mTrackList.get(mIndex);
+
                     if (getView() != null && getView().getTag() != null) {
                         updateView((ViewHolder) getView().getTag());
                     }
-                    enableButtons(false, null);
-                    asyncPlay(true);
-                }*/
+                    enableButtons(false);
+                }
             }
         });
 
@@ -240,7 +226,6 @@ public class PlayerActivityFragment extends Fragment {
         if (mBound) {
             getActivity().unbindService(mConnection);
             mBound = false;
-            Log.d(LOG_TAG, "mBound onStop:" + Boolean.toString(mBound));
         }
     }
 
@@ -326,10 +311,7 @@ public class PlayerActivityFragment extends Fragment {
     public void onDestroy() {
         sMediaPlayer.release();
         sMediaPlayer = null;
-      /*  if (mService.isPlaying()) {
-            mService.pause();
-        }
-        mService.stopSelf();*/
+
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mPlayReceiver);
         Log.d(LOG_TAG, "STOPPING");
         super.onDestroy();
@@ -355,16 +337,11 @@ public class PlayerActivityFragment extends Fragment {
             } else {
                 updateViewDuration(mService.getDuration());
             }
-
-            //Log.d(LOG_TAG, "mBound data:" + mService.data.toString());
-            Log.d(LOG_TAG, "mBound onServiceConnected:" + Boolean.toString(mBound));
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            //mService = null;
             mBound = false;
-            Log.d(LOG_TAG, "mBound onServiceDisconnected:" + Boolean.toString(mBound));
         }
     };
 
@@ -398,7 +375,6 @@ public class PlayerActivityFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            int result;
             String command = intent.getStringExtra(PlayerActivityFragment.COMMAND);
             Log.d(LOG_TAG, "RECEIVED COMMAND: " + command);
             switch (command) {

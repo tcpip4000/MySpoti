@@ -32,23 +32,6 @@
         </activity>
 
         <service
-            android:name=".PlayerService"
-            android:exported="false"
-            android:label="@string/player_service"
-            android:process=":playerService">
-        </service>
-        <service
-            android:name=".PlayerService2"
-            android:enabled="true"
-            android:exported="false" >
-        </service>
-        <service
-            android:name=".PlayerService3"
-            android:enabled="true"
-            android:exported="false"
-            android:process=":playerService3">
-        </service>
-        <service
             android:name=".PlayerService4"
             android:enabled="true"
             android:exported="false">
