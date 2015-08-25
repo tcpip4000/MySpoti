@@ -11,11 +11,9 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.Date;
-
 
 public class PlayerService4 extends Service implements AsyncResponseMediaPlayer {
 
@@ -27,7 +25,11 @@ public class PlayerService4 extends Service implements AsyncResponseMediaPlayer 
     private final IBinder mBinder = new LocalBinder();
     private static boolean sIsPrepared = false;
 
-
+    public static void bindService(Context context, ServiceConnection connection) {
+        context.bindService(new Intent(context, PlayerService4.class),
+                connection,
+                Context.BIND_AUTO_CREATE);
+    }
 
     public void stop() {
         sMediaPlayer.stop();
@@ -35,6 +37,7 @@ public class PlayerService4 extends Service implements AsyncResponseMediaPlayer 
 
     public void reset() {
         sMediaPlayer.reset();
+        sIsPrepared = false;
     }
 
     public int getCurrentPosition() {
@@ -51,22 +54,8 @@ public class PlayerService4 extends Service implements AsyncResponseMediaPlayer 
         }
     }
 
-    public static void bindService(Context context, ServiceConnection connection) {
-        context.bindService(new Intent(context, PlayerService4.class),
-                connection,
-                Context.BIND_AUTO_CREATE);
-
-    }
-
     public int getDuration() {
         return sMediaPlayer.getDuration();
-    }
-
-    private void publishResults(String command) {
-        Intent intent = new Intent(PlayerActivityFragment.NOTIFICATION);
-        intent.putExtra(PlayerActivityFragment.COMMAND, command);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        Log.d(LOG_TAG, "BROADCAST SENDED");
     }
 
   /*  class IncomingHandler extends Handler {
@@ -85,16 +74,10 @@ public class PlayerService4 extends Service implements AsyncResponseMediaPlayer 
         }
     }*/
 
-    //final Messenger mMessenger = new Messenger(new IncomingHandler());
-
-    public String helloWorld(String msg) {
-        return  mDate.toString();
-    }
-
     @Override
     public IBinder onBind(Intent intent) {
-        Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
-        Log.d(LOG_TAG, ">>>>>>>>>>>>>>>>DATE: " + mDate.toString());
+        //Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
+        //Log.d(LOG_TAG, ">>>>>>>>>>>>>>>>DATE: " + mDate.toString());
         return mBinder;
     }
 
@@ -106,9 +89,8 @@ public class PlayerService4 extends Service implements AsyncResponseMediaPlayer 
         return sMediaPlayer.isPlaying();
     }
 
-    public void play(String url) {
-        asyncPlay(url);
-
+    public void play(String url, boolean start) {
+        asyncPlay(url, start);
     }
 
     public void pause() {
@@ -119,11 +101,18 @@ public class PlayerService4 extends Service implements AsyncResponseMediaPlayer 
         return sIsPrepared;
     }
 
-    private void asyncPlay(String url) {
+    private void asyncPlay(String url, boolean start) {
         Log.d(LOG_TAG, "ASYNC STARTED playing url:" + url);
         PlayerTask playerTask = new PlayerTask();
         playerTask.delegate = this;
-        playerTask.execute(url);
+        playerTask.execute(url, start);
+    }
+
+    private void publishResults(String command) {
+        Intent intent = new Intent(PlayerActivityFragment.NOTIFICATION);
+        intent.putExtra(PlayerActivityFragment.COMMAND, command);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        //Log.d(LOG_TAG, "BROADCAST SENDED");
     }
 
     @Override
@@ -137,13 +126,14 @@ public class PlayerService4 extends Service implements AsyncResponseMediaPlayer 
         publishResults(PlayerActivityFragment.CMD_LENGTH_SONG);
     }
 
-    private static class PlayerTask extends AsyncTask<String, Void, Integer> {
+    private static class PlayerTask extends AsyncTask<Object, Void, Integer> {
 
         AsyncResponseMediaPlayer delegate;
 
         @Override
-        protected Integer doInBackground(String... params) {
-            String url = params[0];
+        protected Integer doInBackground(Object... params) {
+            String url = (String) params[0];
+            boolean start = (boolean) params[1];
             //boolean changedSong = (boolean) params[1];
             int status = 0;
 
@@ -151,7 +141,9 @@ public class PlayerService4 extends Service implements AsyncResponseMediaPlayer 
                 sMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 sMediaPlayer.setDataSource(url);
                 sMediaPlayer.prepare();
-                sMediaPlayer.start();
+                if (start) {
+                    sMediaPlayer.start();
+                }
 
                 /*if (!changedSong) {
                     sMediaPlayer.start();

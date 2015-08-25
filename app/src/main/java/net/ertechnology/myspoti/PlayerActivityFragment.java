@@ -85,9 +85,10 @@ public class PlayerActivityFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(PLAYER_PREVIOUS_PLAY, sPreviousPlaying);
         outState.putBoolean(PLAYER_FIRST_TIME, sFirstTime);
+        outState.putString(PLAYER_TRACK_ID, mTrack.getId());
+
         /*outState.putString(PLAYER_ARTIST, mArtistName);
         outState.putParcelableArrayList(PLAYER_LIST, mTrackList);
-        outState.putString(PLAYER_TRACK_ID, mTrack.getId());
         outState.putParcelable(PLAYER_SERVICE, mService);
         outState.putBoolean(PLAYER_BOUND, mBound);*/
         super.onSaveInstanceState(outState);
@@ -97,12 +98,9 @@ public class PlayerActivityFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        String trackId;
         mArtistName = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_ARTIST_NAME);
         mTrackList = getActivity().getIntent().getParcelableArrayListExtra(PlayerActivity.PLAYER_TRACKS);
-        String trackId = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_TRACK_ID);
-        PlayerResponse pr = findTrack(trackId, mTrackList);
-        mTrack = pr.mTrack;
-        mIndex = pr.mIndex;
         sMediaPlayer = new MediaPlayer();
         mPlayReceiver = new PlayReceiver();
         mHandler = new Handler();
@@ -110,59 +108,17 @@ public class PlayerActivityFragment extends Fragment {
         if (savedInstanceState != null) {
             sPreviousPlaying = savedInstanceState.getBoolean(PLAYER_PREVIOUS_PLAY);
             sFirstTime = savedInstanceState.getBoolean(PLAYER_FIRST_TIME);
+            trackId = savedInstanceState.getString(PLAYER_TRACK_ID);
         } else {
+            trackId = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_TRACK_ID);
             sPreviousPlaying = true;
             sFirstTime = true;
         }
 
-//        PlayerService4.bindService(getActivity(), mConnection);
+        PlayerResponse pr = findTrack(trackId, mTrackList);
+        mTrack = pr.mTrack;
+        mIndex = pr.mIndex;
 
-/*        getActivity().bindService(new Intent(getActivity(), PlayerService4.class),
-                mConnection,
-                Context.BIND_AUTO_CREATE);*/
-        //PlayerService.playPlayerService(getActivity(), mConnection, mTrack.getPreviewUrl());
-
-
-
-        //sIsPrepared = false;
-
-        /*if (savedInstanceState == null) {
-            mArtistName = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_ARTIST_NAME);
-            mTrackList = getActivity().getIntent().getParcelableArrayListExtra(PlayerActivity.PLAYER_TRACKS);
-            String trackId = getActivity().getIntent().getStringExtra(PlayerActivity.PLAYER_TRACK_ID);
-            PlayerResponse pr = findTrack(trackId, mTrackList);
-            mTrack = pr.mTrack;
-
-            getActivity().bindService(new Intent(getActivity(), PlayerService3.class), mConnection,
-                    Context.BIND_AUTO_CREATE);
-            //PlayerService.playPlayerService(getActivity(), mConnection, mTrack.getPreviewUrl());
-
-            mIndex = pr.mIndex;
-            sMediaPlayer = new MediaPlayer();
-            sIsPrepared = false;
-            mHandler = new Handler();
-            sPreviousPlaying = true;
-            mIsPlaying = false;
-        } else {
-            mArtistName = savedInstanceState.getString(PLAYER_ARTIST);
-            mTrackList = savedInstanceState.getParcelableArrayList(PLAYER_LIST);
-            String trackId = savedInstanceState.getString(PLAYER_TRACK_ID);
-            PlayerResponse pr = findTrack(trackId, mTrackList);
-            mTrack = pr.mTrack;
-            mIndex = pr.mIndex;
-
-            getActivity().bindService(new Intent(getActivity(), PlayerService3.class), mConnection,
-                    Context.BIND_AUTO_CREATE);
-            //PlayerService.playPlayerService(getActivity(), mConnection, mTrack.getPreviewUrl());
-
-            sMediaPlayer = new MediaPlayer();
-            sIsPrepared = false;
-            mHandler = new Handler();
-            sPreviousPlaying = true;
-            //mIsPlaying = false;
-            mService = savedInstanceState.getParcelable(PLAYER_SERVICE);
-            mBound = savedInstanceState.getBoolean(PLAYER_BOUND);
-        }*/
     }
 
     private PlayerResponse findTrack(String trackId, ArrayList<MyTrack> trackList) {
@@ -193,7 +149,7 @@ public class PlayerActivityFragment extends Fragment {
         updateView(viewHolder);
 
         // Start playing for first time
-        //enableButtons(false, view);
+        enableButtons(false);
         //asyncPlay(false);
 
         // Listeners
@@ -209,8 +165,8 @@ public class PlayerActivityFragment extends Fragment {
                         if (mService.isPrepared()) {
                             mService.start();
                         } else {
-                            //enableButtons(false, null);
-                            mService.play(mTrack.getPreviewUrl());
+                            enableButtons(false);
+                            mService.play(mTrack.getPreviewUrl(), true);
                         }
                         sPreviousPlaying = true;
                         viewHolder.playerPlayPause.setImageResource(android.R.drawable.ic_media_pause);
@@ -222,24 +178,32 @@ public class PlayerActivityFragment extends Fragment {
         viewHolder.playerNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*int indexOld = mIndex;
+                int indexOld = mIndex;
                 mIndex = getNextIndex();
                 if (mIndex != indexOld) {
-                    if (sMediaPlayer.isPlaying()) {
+                    mTrack = mTrackList.get(mIndex);
+
+
+                    if (mService.isPlaying()) {
                         sPreviousPlaying = true;
-                        sMediaPlayer.stop();
+                        Log.d(LOG_TAG, "PLAYING");
+                        mService.stop();
+                        mService.reset();
+                        mService.play(mTrack.getPreviewUrl(), true);
                     } else {
                         sPreviousPlaying = false;
+                        Log.d(LOG_TAG, "PLAYING PAUSE");
+                        mService.stop();
+                        mService.reset();
+                        mService.play(mTrack.getPreviewUrl(), false);
                     }
-                    sMediaPlayer.reset();
-                    sIsPrepared = false;
-                    mTrack = mTrackList.get(mIndex);
+
                     if (getView() != null && getView().getTag() != null) {
                         updateView((ViewHolder) getView().getTag());
                     }
-                    enableButtons(false, null);
-                    asyncPlay(true);
-                }*/
+                    enableButtons(false);
+
+                }
             }
         });
 
@@ -270,11 +234,6 @@ public class PlayerActivityFragment extends Fragment {
         return view;
     }
 
-    /**
-     * Called when the Fragment is no longer started.  This is generally
-     * tied to {@link Activity#onStop() Activity.onStop} of the containing
-     * Activity's lifecycle.
-     */
     @Override
     public void onStop() {
         super.onStop();
@@ -283,7 +242,6 @@ public class PlayerActivityFragment extends Fragment {
             mBound = false;
             Log.d(LOG_TAG, "mBound onStop:" + Boolean.toString(mBound));
         }
-
     }
 
     private void updateView(ViewHolder viewHolder) {
@@ -326,7 +284,7 @@ public class PlayerActivityFragment extends Fragment {
         } else {
             Log.e(LOG_TAG, "Error setting progress bar");
         }
-        enableButtons(true, null);
+        enableButtons(true);
     }
 
     private int getNextIndex() {
@@ -346,54 +304,15 @@ public class PlayerActivityFragment extends Fragment {
         }
         return i;
     }
-/*
-    private void asyncPlay(boolean changedSong) {
-        PlayerTask playerTask = new PlayerTask();
-        playerTask.delegate = (AsyncResponseMediaPlayer) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment);
-        playerTask.execute(mTrack.getPreviewUrl(), changedSong);
-    }*/
 
-    private void enableButtons(boolean enable, View view) {
+    private void enableButtons(boolean enable) {
         ViewHolder viewHolder;
-        if (view == null) {
-            if (getView() != null && (viewHolder = (ViewHolder) getView().getTag()) != null) {
-                viewHolder.playerBack.setEnabled(enable);
-                viewHolder.playerPlayPause.setEnabled(enable);
-                viewHolder.playerNext.setEnabled(enable);
-            }
-        } else {
-            viewHolder = (ViewHolder) view.getTag();
+        if (getView() != null && (viewHolder = (ViewHolder) getView().getTag()) != null) {
             viewHolder.playerBack.setEnabled(enable);
             viewHolder.playerPlayPause.setEnabled(enable);
             viewHolder.playerNext.setEnabled(enable);
         }
     }
-
-    /*@Override
-    public void processFinish(Integer msg) {
-        final ViewHolder viewHolder;
-        if (getView() != null && (viewHolder = (ViewHolder) getView().getTag()) != null && msg == 0) {
-
-            int totalTime = sMediaPlayer.getDuration() ;
-            viewHolder.playerProgressBar.setMax(totalTime / 1000);
-            viewHolder.playerTotalTime.setText(ConvertToMinSec(totalTime));
-
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (sMediaPlayer != null) {
-                        int currentPosition = sMediaPlayer.getCurrentPosition();
-                        viewHolder.playerProgressBar.setProgress(currentPosition / 1000);
-                        viewHolder.playerCurrentTime.setText(ConvertToMinSec(currentPosition));
-                    }
-                    mHandler.postDelayed(this, 1000);
-                }
-            });
-        } else {
-            Log.e(LOG_TAG, "Error setting progress bar");
-        }
-        enableButtons(true, null);
-    }*/
 
     private String ConvertToMinSec(int milliseconds) {
         return String.format("%02d:%02d",
@@ -402,45 +321,6 @@ public class PlayerActivityFragment extends Fragment {
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(milliseconds))
                 );
     }
-
- /*   private static class PlayerTask extends AsyncTask<Object, Void, Integer> {
-
-        AsyncResponseMediaPlayer delegate;
-
-        @Override
-        protected Integer doInBackground(Object... params) {
-            String url = (String) params[0];
-            boolean changedSong = (boolean) params[1];
-            int status = 0;
-
-            try {
-                sMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                sMediaPlayer.setDataSource(url);
-                sMediaPlayer.prepare();
-                if (!changedSong) {
-                    sMediaPlayer.start();
-                } else {
-                    if (sPreviousPlaying) {
-                        sMediaPlayer.start();
-                    }
-                }
-                sIsPrepared = true;
-            } catch (IllegalArgumentException e) {
-                Log.d(LOG_TAG, "Error", e);
-                status = 1;
-            } catch (IOException e) {
-                Log.d(LOG_TAG, "Error", e);
-                status = 2;
-            }
-
-            return status;
-        }
-
-        @Override
-        protected void onPostExecute(Integer msg) {
-            delegate.processFinish(msg);
-        }
-    }*/
 
     @Override
     public void onDestroy() {
@@ -470,7 +350,7 @@ public class PlayerActivityFragment extends Fragment {
                     mService.stop();
                     mService.reset();
                 }
-                mService.play(mTrack.getPreviewUrl()); // Play the first time
+                mService.play(mTrack.getPreviewUrl(), true); // Play the first time
                 sFirstTime = false;
             } else {
                 updateViewDuration(mService.getDuration());
